@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FB AI Draft Dashboard</title>
+  <link rel="stylesheet" href="style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+
+<body>
+  <div class="h-100 flex-center">
+    <div class="dashboard-container">
+      <header class="header">
+        <h1>DASHBOARD</h1>
+        <p>Give instructions, preview the draft, then publish.</p>
+      </header>
+
+      <div class="content-split">
+        <!-- Input Section -->
+        <section class="card input-section">
+          <h2>Create Instruction</h2>
+          <form id="draftForm">
+            <div class="form-group">
+              <label for="topic">What should the post be about?</label>
+              <textarea id="topic" rows="4" placeholder="e.g. Write a tip about securing your online passwords..."
+                required></textarea>
+            </div>
+
+            <div class="form-group file-upload-group">
+              <label for="imageFile">Image File (Optional)</label>
+              <div class="file-upload-wrapper">
+                <input type="file" id="imageFiles" accept="image/*" class="file-input" multiple>
+                <div class="file-upload-visuals">
+                  <span class="file-icon">📁</span>
+                  <span class="file-name" id="fileNameDisplay">Choose an image from your computer...</span>
+                </div>
+              </div>
+            </div>
+
+            <button type="submit" class="btn btn-primary" id="generateBtn">
+              <span class="btn-text">Generate AI Draft</span>
+              <div class="spinner hidden" id="loadingSpinner"></div>
+            </button>
+          </form>
+        </section>
+
+        <!-- Preview Section -->
+        <section class="card preview-section disabled" id="previewSection">
+          <h2>Preview Draft</h2>
+
+          <div class="fb-mockup">
+            <div class="fb-header">
+              <div class="fb-avatar"></div>
+              <div class="fb-info">
+                <strong>Your Page</strong>
+                <span>Just now · 🌎</span>
+              </div>
+            </div>
+            <div class="fb-caption-preview">
+              <textarea id="previewCaption" rows="6" class="editable-caption"></textarea>
+            </div>
+            <div class="fb-image-preview hidden" id="previewImageBox">
+              <!-- Multiple images will be injected here as a grid -->
+              <div id="imageGallery" class="image-gallery"></div>
+            </div>
+          </div>
+
+          <div class="action-buttons">
+            <button class="btn btn-secondary" id="discardBtn">Discard</button>
+            <button class="btn btn-success" id="publishBtn">
+              <span class="btn-text">Publish to Facebook</span>
+              <div class="spinner hidden" id="publishSpinner"></div>
+            </button>
+          </div>
+          <div id="statusMessage" class="hidden status"></div>
+        </section>
+      </div>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+
+</html>
