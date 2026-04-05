@@ -1,0 +1,23 @@
+{
+  "name": "facebookpage-automation",
+  "version": "1.0.0",
+  "description": "You are an advanced AI automation developer. Your task is to build a complete Facebook Page automation system using JavaScript (Node.js) inside Antigravity.",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "@google/genai": "^1.48.0",
+    "@openrouter/sdk": "^0.11.2",
+    "axios": "^1.14.0",
+    "dotenv": "^17.3.1",
+    "express": "^5.2.1",
+    "form-data": "^4.0.5",
+    "multer": "^2.1.1"
+  }
+}
