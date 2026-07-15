@@ -11,8 +11,8 @@ interface QueueItem {
   position: number;
   post: {
     id: string;
-    caption: string;
-    imageUrl?: string;
+    content: string;
+    mediaUrls: string[];
     status: string;
   };
 }
@@ -159,16 +159,15 @@ export default function QueueManager() {
                 {item.position}
               </div>
 
-              {item.post.imageUrl && (
-                <img
-                  src={item.post.imageUrl}
-                  alt=""
-                  className="w-12 h-12 object-cover rounded flex-shrink-0"
-                />
-              )}
-
               <div className="flex-1 min-w-0">
-                <p className="text-sm text-gray-900 line-clamp-1">{item.post.caption}</p>
+                {item.post.mediaUrls?.[0] && (
+                  <img
+                    src={item.post.mediaUrls[0]}
+                    alt=""
+                    className="w-12 h-12 object-cover rounded"
+                  />
+                )}
+                <p className="text-sm text-gray-900 line-clamp-1">{item.post.content}</p>
                 <p className="text-xs text-gray-500">
                   {new Date(item.scheduledAt).toLocaleString()}
                 </p>

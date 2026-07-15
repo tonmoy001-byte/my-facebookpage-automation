@@ -31,8 +31,8 @@ interface SummaryStats {
 
 interface TopPost {
   id: string;
-  caption: string;
-  imageUrl?: string;
+  content: string;
+  mediaUrls: string[];
   metrics: {
     impressions: number;
     engagement: number;
@@ -372,15 +372,15 @@ export default function AnalyticsPage() {
                   <div className="flex-shrink-0 w-8 h-8 bg-blue-100 text-blue-800 rounded-full flex items-center justify-center font-bold">
                     {idx + 1}
                   </div>
-                  {post.imageUrl && (
-                    <img
-                      src={post.imageUrl}
-                      alt=""
-                      className="w-16 h-16 object-cover rounded"
-                    />
-                  )}
                   <div className="flex-1 min-w-0">
-                    <p className="text-gray-900 line-clamp-2">{post.caption}</p>
+                    {post.mediaUrls?.[0] && (
+                      <img
+                        src={post.mediaUrls[0]}
+                        alt=""
+                        className="w-12 h-12 object-cover rounded mb-2"
+                      />
+                    )}
+                    <p className="text-gray-900 line-clamp-2">{post.content}</p>
                     <div className="flex gap-4 mt-2 text-sm text-gray-600">
                       <span>👁 {formatNumber(post.metrics.impressions)}</span>
                       <span>❤️ {formatNumber(post.metrics.likes)}</span>

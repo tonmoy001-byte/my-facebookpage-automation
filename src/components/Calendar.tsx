@@ -8,8 +8,8 @@ interface ScheduledPost {
   postId: string;
   scheduledAt: string;
   post: {
-    caption: string;
-    imageUrl?: string;
+    content: string;
+    mediaUrls: string[];
     status: string;
   };
 }
@@ -133,7 +133,7 @@ export default function Calendar({ scheduledPosts, onDateSelect, onPostClick }: 
                       minute: '2-digit',
                     })}
                     {' '}
-                    {post.post.caption.substring(0, 20)}...
+                     {post.post.content.substring(0, 20)}...
                   </button>
                 ))}
                 {posts.length > 3 && (

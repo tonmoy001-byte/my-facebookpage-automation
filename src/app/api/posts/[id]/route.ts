@@ -68,10 +68,9 @@ export async function PUT(
     const updatedPost = await prisma.post.update({
       where: { id },
       data: {
-        caption: caption || post.caption,
-        hashtags: hashtags || post.hashtags,
-        imageUrl: imageUrl || post.imageUrl,
-        brandVoiceId: brandVoiceId || post.brandVoiceId,
+        content: caption || post.content,
+        mediaUrls: imageUrl ? [imageUrl] : post.mediaUrls,
+        brandVoice: brandVoiceId || post.brandVoice,
         status: status || post.status,
       },
     });

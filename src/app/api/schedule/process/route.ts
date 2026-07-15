@@ -55,13 +55,13 @@ export async function POST(request: Request) {
         let result;
 
         // Post to Facebook based on content type
-        if (post.imageUrl) {
+        if (post.mediaUrls?.[0]) {
           result = await fbService.postPhoto(
-            post.imageUrl,
-            post.caption
+            post.mediaUrls[0],
+            post.content
           );
         } else {
-          result = await fbService.postToFeed(post.caption);
+          result = await fbService.postToFeed(post.content);
         }
 
         // Update post status to published
@@ -150,7 +150,7 @@ export async function GET(request: Request) {
         post: {
           select: {
             id: true,
-            caption: true,
+            content: true,
           },
         },
       },

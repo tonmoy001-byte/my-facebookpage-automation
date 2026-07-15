@@ -14,10 +14,10 @@ interface ScheduledPost {
   scheduledAt: string;
   post: {
     id: string;
-    caption: string;
-    imageUrl?: string;
+    content: string;
+    mediaUrls: string[];
     status: string;
-    hashtags: string[];
+    brandVoice?: string;
   };
 }
 
@@ -133,14 +133,14 @@ export default function SchedulePage() {
             {selectedPost && (
               <div className="bg-white rounded-lg shadow p-6">
                 <h3 className="font-semibold text-gray-900 mb-4">Selected Post</h3>
-                {selectedPost.post.imageUrl && (
-                  <img
-                    src={selectedPost.post.imageUrl}
-                    alt=""
-                    className="w-full h-40 object-cover rounded-lg mb-4"
-                  />
-                )}
-                <p className="text-gray-900 mb-2">{selectedPost.post.caption}</p>
+                 {selectedPost.post.mediaUrls?.[0] && (
+                    <img
+                      src={selectedPost.post.mediaUrls[0]}
+                      alt=""
+                      className="w-full h-40 object-cover rounded-lg mb-4"
+                    />
+                  )}
+                  <p className="text-gray-900 mb-2">{selectedPost.post.content}</p>
                 <p className="text-sm text-gray-500 mb-4">
                   Scheduled for: {new Date(selectedPost.scheduledAt).toLocaleString()}
                 </p>
@@ -179,7 +179,7 @@ export default function SchedulePage() {
                       }`}
                     >
                       <p className="text-sm text-gray-900 line-clamp-2">
-                        {schedule.post.caption}
+                        {schedule.post.content}
                       </p>
                       <p className="text-xs text-gray-500 mt-1">
                         {new Date(schedule.scheduledAt).toLocaleString()}

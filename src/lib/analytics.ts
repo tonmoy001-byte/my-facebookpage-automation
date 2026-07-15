@@ -150,8 +150,8 @@ export async function getAnalytics(
       post: {
         select: {
           id: true,
-          caption: true,
-          imageUrl: true,
+          content: true,
+          mediaUrls: true,
           createdAt: true,
         },
       },

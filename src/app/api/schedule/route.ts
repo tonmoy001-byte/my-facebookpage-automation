@@ -34,10 +34,10 @@ export async function GET(request: Request) {
         post: {
           select: {
             id: true,
-            caption: true,
-            imageUrl: true,
+            content: true,
+            mediaUrls: true,
             status: true,
-            hashtags: true,
+            brandVoice: true,
           },
         },
       },

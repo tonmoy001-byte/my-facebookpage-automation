@@ -72,15 +72,19 @@ export async function POST(request: Request) {
       );
     }
 
+    // Build content with hashtags appended
+    const hashtagText = hashtags?.length ? '\n\n' + hashtags.map((h: string) => `#${h}`).join(' ') : '';
+    const content = caption + hashtagText;
+
     // Create the post
     const post = await prisma.post.create({
       data: {
         userId: user.id,
         pageId: page.id,
-        caption,
-        hashtags: hashtags || [],
-        imageUrl,
-        brandVoiceId: brandVoiceId || null,
+        content,
+        mediaUrls: imageUrl ? [imageUrl] : [],
+        mediaType: imageUrl ? 'image' : 'text',
+        brandVoice: brandVoiceId || 'professional',
         status: scheduledAt ? 'scheduled' : 'draft',
       },
     });

@@ -9,14 +9,11 @@ import { useAuth } from '@/lib/auth-context';
 
 interface Post {
   id: string;
-  caption: string;
-  hashtags: string[];
-  imageUrl?: string;
+  content: string;
+  mediaUrls: string[];
   status: string;
+  brandVoice?: string;
   createdAt: string;
-  brandVoice?: {
-    name: string;
-  };
   schedules?: {
     scheduledAt: string;
   }[];
@@ -148,9 +145,9 @@ export default function PostsListPage() {
                 className="bg-white rounded-lg shadow p-6 hover:shadow-md transition-shadow"
               >
                 <div className="flex items-start gap-4">
-                  {post.imageUrl && (
+                  {post.mediaUrls?.[0] && (
                     <img
-                      src={post.imageUrl}
+                      src={post.mediaUrls[0]}
                       alt=""
                       className="w-20 h-20 object-cover rounded-lg flex-shrink-0"
                     />
@@ -166,28 +163,11 @@ export default function PostsListPage() {
                       </span>
                       {post.brandVoice && (
                         <span className="text-xs text-gray-500">
-                          {post.brandVoice.name}
+                          {post.brandVoice}
                         </span>
                       )}
                     </div>
-                    <p className="text-gray-900 line-clamp-2 mb-2">{post.caption}</p>
-                    {post.hashtags.length > 0 && (
-                      <div className="flex flex-wrap gap-1">
-                        {post.hashtags.slice(0, 3).map((tag) => (
-                          <span
-                            key={tag}
-                            className="text-blue-600 text-sm"
-                          >
-                            #{tag}
-                          </span>
-                        ))}
-                        {post.hashtags.length > 3 && (
-                          <span className="text-gray-500 text-sm">
-                            +{post.hashtags.length - 3} more
-                          </span>
-                        )}
-                      </div>
-                    )}
+                    <p className="text-gray-900 line-clamp-2 mb-2">{post.content}</p>
                   </div>
                   <div className="flex flex-col gap-2">
                     <Button
