@@ -22,6 +22,7 @@ model User {
   posts         Post[]
   schedules     Schedule[]
   replyRules    ReplyRule[]
+  comments      Comment[]
   analytics     Analytics[]
 }
 
@@ -79,19 +80,24 @@ model Schedule {
 
 model Comment {
   id              String   @id @default(cuid())
+  userId          String
   pageId          String
   postId          String?
+  ruleId          String?
   facebookCommentId String @unique
   authorName      String
   authorId        String
   content         String
-  replied         Boolean  @default(false)
+  status          String   @default("pending") // pending, replied, ignored, flagged
+  reply           String?  // The reply text if replied
   repliedAt       DateTime?
   createdAt       DateTime @default(now())
 
   // Relations
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   page            FacebookPage @relation(fields: [pageId], references: [id], onDelete: Cascade)
   post            Post?    @relation(fields: [postId], references: [id], onDelete: SetNull)
+  rule            ReplyRule? @relation(fields: [ruleId], references: [id], onDelete: SetNull)
 }
 
 model ReplyRule {
@@ -118,6 +124,7 @@ model ReplyRule {
 
   // Relations
   user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  comments        Comment[]
 }
 
 model Analytics {

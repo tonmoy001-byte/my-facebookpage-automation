@@ -1,7 +1,7 @@
 // @ts-nocheck
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { verifyWebhookSignature } from '@/lib/facebook';
+import { createFacebookService, verifyWebhookSignature } from '@/lib/facebook';
 
 export async function GET(request: Request) {
   const url = new URL(request.url);
@@ -19,6 +19,18 @@ export async function GET(request: Request) {
 
 export async function POST(request: Request) {
   try {
+    // Verify webhook signature if app secret is configured
+    const appSecret = process.env.FACEBOOK_APP_SECRET;
+    if (appSecret) {
+      const signature = request.headers.get('x-hub-signature-256');
+      const body = await request.text();
+
+      if (signature && !verifyWebhookSignature(body, signature, appSecret)) {
+        console.error('Invalid webhook signature');
+        return NextResponse.json({ status: 'invalid signature' }, { status: 403 });
+      }
+    }
+
     const body = await request.json();
 
     // Verify this is a page event
@@ -28,6 +40,18 @@ export async function POST(request: Request) {
 
     // Process each entry
     for (const entry of body.entry) {
+      const pageIdFromWebhook = entry.id;
+
+      // Find the specific page that received this event
+      const page = await prisma.facebookPage.findFirst({
+        where: { pageId: pageIdFromWebhook },
+      });
+
+      if (!page) {
+        console.log(`No connected page found for page ID: ${pageIdFromWebhook}`);
+        continue;
+      }
+
       if (!entry.changes) continue;
 
       for (const change of entry.changes) {
@@ -36,7 +60,7 @@ export async function POST(request: Request) {
 
           // Handle new comments
           if (value.item === 'comment' && value.verb === 'add') {
-            await handleNewComment(value);
+            await handleNewComment(value, page);
           }
         }
       }
@@ -49,41 +73,81 @@ export async function POST(request: Request) {
   }
 }
 
-async function handleNewComment(value: any) {
+async function handleNewComment(value: any, page: any) {
   const { comment_id, message, from, post_id } = value;
 
   if (!from?.id || !message) return;
 
-  // Find the page by checking all connected pages
-  // In production, you'd want to match by page ID from the webhook entry
-  const pages = await prisma.facebookPage.findMany();
-
-  for (const page of pages) {
-    // Store the comment for processing
-    await prisma.comment.create({
-      data: {
-        pageId: page.id,
-        facebookCommentId: comment_id,
-        authorName: from.name || 'Unknown',
-        authorId: from.id,
-        content: message,
-      },
+  // Try to find the post in our database
+  let postId = null;
+  if (post_id) {
+    const post = await prisma.post.findFirst({
+      where: { facebookPostId: post_id },
     });
+    if (post) postId = post.id;
+  }
 
-    // Check for matching reply rules
-    const rules = await prisma.replyRule.findMany({
-      where: {
-        userId: page.userId,
-        isActive: true,
-      },
-    });
+  // Check for matching reply rules for this user
+  const rules = await prisma.replyRule.findMany({
+    where: {
+      userId: page.userId,
+      isActive: true,
+    },
+    orderBy: { priority: 'desc' },
+  });
 
-    for (const rule of rules) {
-      if (shouldReply(rule, message)) {
-        // Generate and send reply (will be implemented in Phase 5)
-        console.log(`Would reply to comment ${comment_id} using rule ${rule.name}`);
-        break;
+  let matchedRule = null;
+  let replyText = null;
+
+  for (const rule of rules) {
+    if (shouldReply(rule, message)) {
+      matchedRule = rule;
+
+      // Use the rule's reply template or generate AI reply
+      if (rule.replyTemplate) {
+        replyText = rule.replyTemplate;
       }
+      break;
+    }
+  }
+
+  // Store the comment
+  const comment = await prisma.comment.create({
+    data: {
+      userId: page.userId,
+      pageId: page.id,
+      postId,
+      ruleId: matchedRule?.id || null,
+      facebookCommentId: comment_id,
+      authorName: from.name || 'Unknown',
+      authorId: from.id,
+      content: message,
+      status: matchedRule ? 'replied' : 'pending',
+    },
+  });
+
+  // Send the auto-reply if a rule matched
+  if (matchedRule && replyText) {
+    try {
+      const fbService = createFacebookService(page.accessToken, page.pageId);
+      await fbService.replyToComment(comment_id, replyText);
+
+      await prisma.comment.update({
+        where: { id: comment.id },
+        data: {
+          reply: replyText,
+          repliedAt: new Date(),
+          status: 'replied',
+        },
+      });
+
+      console.log(`Auto-replied to comment ${comment_id} using rule ${matchedRule.name}`);
+    } catch (error) {
+      console.error(`Failed to reply to comment ${comment_id}:`, error);
+      await prisma.comment.update({
+        where: { id: comment.id },
+        data: { status: 'pending' },
+      });
     }
   }
 }
@@ -98,7 +162,6 @@ function shouldReply(rule: any, message: string): boolean {
       );
 
     case 'sentiment':
-      // Simple sentiment check - in production, use AI
       if (rule.sentiment === 'positive') {
         return /\b(love|great|awesome|amazing|thank|good|nice|happy)\b/i.test(message);
       }
