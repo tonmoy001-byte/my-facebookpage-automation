@@ -10,7 +10,7 @@ import Button from '@/components/ui/Button';
 import { useToast } from '@/components/Toast';
 
 export default function SettingsPage() {
-  const { user, loading } = useAuth();
+  const { user, loading, token } = useAuth();
   const router = useRouter();
   const { addToast } = useToast();
   const [activeTab, setActiveTab] = useState('account');
@@ -55,7 +55,7 @@ export default function SettingsPage() {
     try {
       const response = await fetch('/api/auth/profile', {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) },
         body: JSON.stringify(profileForm),
       });
 
@@ -90,7 +90,7 @@ export default function SettingsPage() {
     try {
       const response = await fetch('/api/auth/password', {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) },
         body: JSON.stringify({
           currentPassword: passwordForm.currentPassword,
           newPassword: passwordForm.newPassword,

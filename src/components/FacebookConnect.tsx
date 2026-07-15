@@ -3,6 +3,7 @@
 
 import { useState, useEffect } from 'react';
 import Button from '@/components/ui/Button';
+import { useAuth } from '@/lib/auth-context';
 
 interface ConnectedPage {
   id: string;
@@ -21,6 +22,9 @@ export default function FacebookConnect() {
     pageName: '',
     accessToken: '',
   });
+  const { token } = useAuth();
+
+  const authHeaders = token ? { Authorization: `Bearer ${token}` } : {};
 
   useEffect(() => {
     fetchPages();
@@ -28,7 +32,9 @@ export default function FacebookConnect() {
 
   const fetchPages = async () => {
     try {
-      const response = await fetch('/api/facebook/pages');
+      const response = await fetch('/api/facebook/pages', {
+        headers: authHeaders,
+      });
       if (response.ok) {
         const data = await response.json();
         setPages(data.pages);
@@ -48,7 +54,7 @@ export default function FacebookConnect() {
     try {
       const response = await fetch('/api/facebook/connect', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', ...authHeaders },
         body: JSON.stringify(formData),
       });
 
@@ -72,6 +78,7 @@ export default function FacebookConnect() {
     try {
       const response = await fetch(`/api/facebook/${pageId}`, {
         method: 'DELETE',
+        headers: authHeaders,
       });
 
       if (response.ok) {

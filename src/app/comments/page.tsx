@@ -4,6 +4,7 @@
 import { useState, useEffect } from 'react';
 import Navigation from '@/components/Navigation';
 import Button from '@/components/ui/Button';
+import { useAuth } from '@/lib/auth-context';
 
 interface Comment {
   id: string;
@@ -29,6 +30,7 @@ export default function CommentsPage() {
   const [filter, setFilter] = useState<string>('');
   const [page, setPage] = useState(1);
   const [total, setTotal] = useState(0);
+  const { token } = useAuth();
   const limit = 20;
 
   useEffect(() => {
@@ -44,7 +46,9 @@ export default function CommentsPage() {
       });
       if (filter) params.append('status', filter);
 
-      const response = await fetch(`/api/comments?${params}`);
+      const response = await fetch(`/api/comments?${params}`, {
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      });
       if (response.ok) {
         const data = await response.json();
         setComments(data.comments);

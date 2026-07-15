@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import Navigation from '@/components/Navigation';
 import Calendar from '@/components/Calendar';
 import Button from '@/components/ui/Button';
+import { useAuth } from '@/lib/auth-context';
 
 interface ScheduledPost {
   id: string;
@@ -25,6 +26,7 @@ export default function SchedulePage() {
   const [scheduledPosts, setScheduledPosts] = useState<ScheduledPost[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedPost, setSelectedPost] = useState<ScheduledPost | null>(null);
+  const { token } = useAuth();
 
   useEffect(() => {
     fetchScheduledPosts();
@@ -32,7 +34,9 @@ export default function SchedulePage() {
 
   const fetchScheduledPosts = async () => {
     try {
-      const response = await fetch('/api/schedule');
+      const response = await fetch('/api/schedule', {
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      });
       if (response.ok) {
         const data = await response.json();
         setScheduledPosts(data.schedules);
@@ -48,7 +52,7 @@ export default function SchedulePage() {
     try {
       const response = await fetch('/api/schedule', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) },
         body: JSON.stringify({
           postId: scheduledPosts.find((s) => s.id === scheduleId)?.postId,
           scheduledAt: newDate.toISOString(),
@@ -69,6 +73,7 @@ export default function SchedulePage() {
     try {
       const response = await fetch(`/api/schedule/${scheduleId}`, {
         method: 'DELETE',
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
       });
 
       if (response.ok) {

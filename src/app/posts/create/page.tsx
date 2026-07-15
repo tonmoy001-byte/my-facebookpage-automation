@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import Navigation from '@/components/Navigation';
 import FileUpload from '@/components/FileUpload';
 import Button from '@/components/ui/Button';
+import { useAuth } from '@/lib/auth-context';
 
 interface BrandVoice {
   id: string;
@@ -26,6 +27,7 @@ export default function CreatePostPage() {
   const [generating, setGenerating] = useState(false);
   const [saving, setSaving] = useState(false);
   const [scheduledAt, setScheduledAt] = useState('');
+  const { token } = useAuth();
 
   useEffect(() => {
     fetchBrandVoices();
@@ -33,7 +35,9 @@ export default function CreatePostPage() {
 
   const fetchBrandVoices = async () => {
     try {
-      const response = await fetch('/api/brand-voices');
+      const response = await fetch('/api/brand-voices', {
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      });
       if (response.ok) {
         const data = await response.json();
         setBrandVoices(data.voices);
@@ -53,7 +57,7 @@ export default function CreatePostPage() {
     try {
       const response = await fetch('/api/ai/caption', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) },
         body: JSON.stringify({
           imageUrl,
           description,
@@ -92,7 +96,7 @@ export default function CreatePostPage() {
     try {
       const response = await fetch('/api/posts', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) },
         body: JSON.stringify({
           caption,
           hashtags,

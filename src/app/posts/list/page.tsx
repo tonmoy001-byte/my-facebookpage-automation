@@ -5,6 +5,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Navigation from '@/components/Navigation';
 import Button from '@/components/ui/Button';
+import { useAuth } from '@/lib/auth-context';
 
 interface Post {
   id: string;
@@ -29,6 +30,7 @@ export default function PostsListPage() {
   const [page, setPage] = useState(1);
   const [total, setTotal] = useState(0);
   const limit = 10;
+  const { token } = useAuth();
 
   useEffect(() => {
     fetchPosts();
@@ -43,7 +45,9 @@ export default function PostsListPage() {
       });
       if (filter) params.append('status', filter);
 
-      const response = await fetch(`/api/posts?${params}`);
+      const response = await fetch(`/api/posts?${params}`, {
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      });
       if (response.ok) {
         const data = await response.json();
         setPosts(data.posts);
@@ -62,6 +66,7 @@ export default function PostsListPage() {
     try {
       const response = await fetch(`/api/posts/${id}`, {
         method: 'DELETE',
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
       });
 
       if (response.ok) {

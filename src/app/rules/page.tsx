@@ -4,6 +4,7 @@
 import { useState, useEffect } from 'react';
 import Navigation from '@/components/Navigation';
 import Button from '@/components/ui/Button';
+import { useAuth } from '@/lib/auth-context';
 
 interface ReplyRule {
   id: string;
@@ -36,6 +37,7 @@ export default function RulesPage() {
     responseTemplate: '',
     useAI: false,
   });
+  const { token } = useAuth();
 
   useEffect(() => {
     fetchRules();
@@ -43,7 +45,9 @@ export default function RulesPage() {
 
   const fetchRules = async () => {
     try {
-      const response = await fetch('/api/rules');
+      const response = await fetch('/api/rules', {
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      });
       if (response.ok) {
         const data = await response.json();
         setRules(data.rules);
@@ -72,7 +76,7 @@ export default function RulesPage() {
 
       const response = await fetch(url, {
         method,
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) },
         body: JSON.stringify(payload),
       });
 
@@ -107,6 +111,7 @@ export default function RulesPage() {
     try {
       const response = await fetch(`/api/rules/${id}`, {
         method: 'DELETE',
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
       });
 
       if (response.ok) {
@@ -121,7 +126,7 @@ export default function RulesPage() {
     try {
       const response = await fetch(`/api/rules/${rule.id}`, {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) },
         body: JSON.stringify({ isActive: !rule.isActive }),
       });
 

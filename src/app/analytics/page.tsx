@@ -16,6 +16,7 @@ import {
 } from 'recharts';
 import Navigation from '@/components/Navigation';
 import Button from '@/components/ui/Button';
+import { useAuth } from '@/lib/auth-context';
 
 interface SummaryStats {
   totalPosts: number;
@@ -67,6 +68,7 @@ export default function AnalyticsPage() {
   const [dateRange, setDateRange] = useState('30');
   const [customStartDate, setCustomStartDate] = useState('');
   const [customEndDate, setCustomEndDate] = useState('');
+  const { token } = useAuth();
 
   useEffect(() => {
     fetchData();
@@ -93,11 +95,12 @@ export default function AnalyticsPage() {
       if (endDate) params.append('end', endDate);
       params.append('days', dateRange === 'all' ? '365' : dateRange);
 
+      const authHeaders = token ? { Authorization: `Bearer ${token}` } : {};
       const [statsRes, topPostsRes, dayEngRes, analyticsRes] = await Promise.all([
-        fetch(`/api/analytics/summary?${params}`),
-        fetch(`/api/analytics/top-posts?${params}`),
-        fetch(`/api/analytics/by-day?${params}`),
-        fetch(`/api/analytics?${params}`),
+        fetch(`/api/analytics/summary?${params}`, { headers: authHeaders }),
+        fetch(`/api/analytics/top-posts?${params}`, { headers: authHeaders }),
+        fetch(`/api/analytics/by-day?${params}`, { headers: authHeaders }),
+        fetch(`/api/analytics?${params}`, { headers: authHeaders }),
       ]);
 
       if (statsRes.ok) {
