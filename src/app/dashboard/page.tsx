@@ -55,7 +55,7 @@ export default function DashboardPage() {
           <h2 className="text-lg font-semibold mb-4">Quick Actions</h2>
           <div className="flex gap-4">
             <a
-              href="/posts/new"
+              href="/posts/create"
               className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
             >
               Create New Post
