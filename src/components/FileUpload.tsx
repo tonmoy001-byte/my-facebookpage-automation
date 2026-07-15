@@ -3,6 +3,7 @@
 
 import { useState, useRef } from 'react';
 import Button from '@/components/ui/Button';
+import { useAuth } from '@/lib/auth-context';
 
 interface FileUploadProps {
   onUpload: (url: string, type: 'image' | 'video') => void;
@@ -14,6 +15,7 @@ export default function FileUpload({ onUpload, accept = 'image/*,video/*' }: Fil
   const [preview, setPreview] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const { token } = useAuth();
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -43,6 +45,7 @@ export default function FileUpload({ onUpload, accept = 'image/*,video/*' }: Fil
 
       const response = await fetch('/api/upload', {
         method: 'POST',
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
         body: formData,
       });
 
