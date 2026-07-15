@@ -70,6 +70,14 @@ export async function POST(request: Request) {
       );
     }
 
+    const scheduledDate = new Date(scheduledAt);
+    if (scheduledDate <= new Date()) {
+      return NextResponse.json(
+        { error: 'Scheduled time must be in the future' },
+        { status: 400 }
+      );
+    }
+
     // Verify the post belongs to the user
     const post = await prisma.post.findFirst({
       where: {

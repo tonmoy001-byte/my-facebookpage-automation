@@ -14,8 +14,7 @@ model User {
   email         String    @unique
   passwordHash  String
   name          String
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  createdAt       DateTime @default(now())
 
   // Relations
   facebookPage  FacebookPage?
@@ -72,6 +71,7 @@ model Schedule {
   status          String   @default("pending") // pending, processing, completed, failed
   retryCount      Int      @default(0)
   createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
 
   // Relations
   post            Post     @relation(fields: [postId], references: [id], onDelete: Cascade)

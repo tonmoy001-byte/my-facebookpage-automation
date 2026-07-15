@@ -12,6 +12,8 @@ interface ScheduledPost {
   id: string;
   postId: string;
   scheduledAt: string;
+  status: string;
+  retryCount: number;
   post: {
     id: string;
     content: string;
@@ -20,6 +22,13 @@ interface ScheduledPost {
     brandVoice?: string;
   };
 }
+
+const statusConfig: Record<string, { label: string; color: string }> = {
+  pending: { label: 'Pending', color: 'bg-yellow-100 text-yellow-800' },
+  processing: { label: 'Processing', color: 'bg-blue-100 text-blue-800' },
+  completed: { label: 'Published', color: 'bg-green-100 text-green-800' },
+  failed: { label: 'Failed', color: 'bg-red-100 text-red-800' },
+};
 
 export default function SchedulePage() {
   const router = useRouter();
@@ -45,25 +54,6 @@ export default function SchedulePage() {
       console.error('Failed to fetch scheduled posts:', error);
     } finally {
       setLoading(false);
-    }
-  };
-
-  const handleReschedule = async (scheduleId: string, newDate: Date) => {
-    try {
-      const response = await fetch('/api/schedule', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) },
-        body: JSON.stringify({
-          postId: scheduledPosts.find((s) => s.id === scheduleId)?.postId,
-          scheduledAt: newDate.toISOString(),
-        }),
-      });
-
-      if (response.ok) {
-        await fetchScheduledPosts();
-      }
-    } catch (error) {
-      console.error('Failed to reschedule:', error);
     }
   };
 
@@ -122,7 +112,7 @@ export default function SchedulePage() {
           <div className="lg:col-span-2">
             <Calendar
               scheduledPosts={scheduledPosts}
-              onDateSelect={(date) => console.log('Selected date:', date)}
+              onDateSelect={() => {}}
               onPostClick={handlePostClick}
             />
           </div>
@@ -132,7 +122,12 @@ export default function SchedulePage() {
             {/* Selected Post Details */}
             {selectedPost && (
               <div className="bg-white rounded-lg shadow p-6">
-                <h3 className="font-semibold text-gray-900 mb-4">Selected Post</h3>
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="font-semibold text-gray-900">Selected Post</h3>
+                  <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${statusConfig[selectedPost.status]?.color || 'bg-gray-100 text-gray-800'}`}>
+                    {statusConfig[selectedPost.status]?.label || selectedPost.status}
+                  </span>
+                </div>
                  {selectedPost.post.mediaUrls?.[0] && (
                     <img
                       src={selectedPost.post.mediaUrls[0]}
@@ -141,34 +136,35 @@ export default function SchedulePage() {
                     />
                   )}
                   <p className="text-gray-900 mb-2">{selectedPost.post.content}</p>
-                <p className="text-sm text-gray-500 mb-4">
+                <p className="text-sm text-gray-500 mb-1">
                   Scheduled for: {new Date(selectedPost.scheduledAt).toLocaleString()}
                 </p>
-                <div className="flex gap-2">
-                  <Button
-                    onClick={() => router.push(`/posts/${selectedPost.post.id}`)}
-                    className="bg-gray-200 hover:bg-gray-300 text-gray-800 text-sm"
-                  >
-                    Edit
-                  </Button>
-                  <Button
-                    onClick={() => handleDelete(selectedPost.id)}
-                    className="bg-red-100 hover:bg-red-200 text-red-700 text-sm"
-                  >
-                    Unschedule
-                  </Button>
-                </div>
+                {selectedPost.status === 'failed' && selectedPost.retryCount > 0 && (
+                  <p className="text-sm text-red-600 mb-2">
+                    Failed after {selectedPost.retryCount} {selectedPost.retryCount === 1 ? 'retry' : 'retries'}
+                  </p>
+                )}
+                {selectedPost.status === 'pending' && (
+                  <div className="flex gap-2 mt-4">
+                    <Button
+                      onClick={() => handleDelete(selectedPost.id)}
+                      className="bg-red-100 hover:bg-red-200 text-red-700 text-sm"
+                    >
+                      Unschedule
+                    </Button>
+                  </div>
+                )}
               </div>
             )}
 
             {/* Upcoming Posts List */}
             <div className="bg-white rounded-lg shadow p-6">
-              <h3 className="font-semibold text-gray-900 mb-4">Upcoming Posts</h3>
+              <h3 className="font-semibold text-gray-900 mb-4">Scheduled Posts</h3>
               {scheduledPosts.length === 0 ? (
                 <p className="text-gray-500 text-sm">No scheduled posts</p>
               ) : (
                 <div className="space-y-3">
-                  {scheduledPosts.slice(0, 5).map((schedule) => (
+                  {scheduledPosts.slice(0, 10).map((schedule) => (
                     <div
                       key={schedule.id}
                       onClick={() => setSelectedPost(schedule)}
@@ -178,9 +174,14 @@ export default function SchedulePage() {
                           : 'bg-gray-50 hover:bg-gray-100'
                       }`}
                     >
-                      <p className="text-sm text-gray-900 line-clamp-2">
-                        {schedule.post.content}
-                      </p>
+                      <div className="flex items-start justify-between gap-2">
+                        <p className="text-sm text-gray-900 line-clamp-2 flex-1">
+                          {schedule.post.content}
+                        </p>
+                        <span className={`shrink-0 px-2 py-0.5 rounded-full text-xs font-medium ${statusConfig[schedule.status]?.color || 'bg-gray-100 text-gray-800'}`}>
+                          {statusConfig[schedule.status]?.label || schedule.status}
+                        </span>
+                      </div>
                       <p className="text-xs text-gray-500 mt-1">
                         {new Date(schedule.scheduledAt).toLocaleString()}
                       </p>
@@ -197,6 +198,18 @@ export default function SchedulePage() {
                 <div className="flex justify-between text-sm">
                   <span className="text-gray-600">Total Scheduled</span>
                   <span className="font-medium">{scheduledPosts.length}</span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span className="text-gray-600">Pending</span>
+                  <span className="font-medium text-yellow-600">
+                    {scheduledPosts.filter((s) => s.status === 'pending').length}
+                  </span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span className="text-gray-600">Failed</span>
+                  <span className="font-medium text-red-600">
+                    {scheduledPosts.filter((s) => s.status === 'failed').length}
+                  </span>
                 </div>
                 <div className="flex justify-between text-sm">
                   <span className="text-gray-600">This Week</span>

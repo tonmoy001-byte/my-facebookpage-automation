@@ -6,10 +6,11 @@ import { createFacebookService } from '@/lib/facebook';
 async function processSchedules() {
   const now = new Date();
 
-  // Find all schedules that are due
+  // Find all schedules that are due (only pick pending or failed-with-retries)
   const dueSchedules = await prisma.schedule.findMany({
     where: {
       scheduledAt: { lte: now },
+      status: { in: ['pending', 'failed'] },
       post: { status: 'scheduled' },
     },
     include: {
@@ -93,8 +94,11 @@ async function processSchedules() {
         console.error(`Failed to collect analytics for post ${post.id}:`, insightError);
       }
 
-      // Delete the schedule
-      await prisma.schedule.delete({ where: { id: schedule.id } });
+      // Mark schedule as completed
+      await prisma.schedule.update({
+        where: { id: schedule.id },
+        data: { status: 'completed' },
+      });
 
       results.push({
         postId: post.id,

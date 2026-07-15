@@ -1,12 +1,13 @@
 // @ts-nocheck
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 
 interface ScheduledPost {
   id: string;
   postId: string;
   scheduledAt: string;
+  status: string;
   post: {
     content: string;
     mediaUrls: string[];
@@ -20,9 +21,15 @@ interface CalendarProps {
   onPostClick: (post: ScheduledPost) => void;
 }
 
+const statusColors: Record<string, string> = {
+  pending: 'bg-yellow-100 text-yellow-800 hover:bg-yellow-200',
+  processing: 'bg-blue-100 text-blue-800 hover:bg-blue-200',
+  completed: 'bg-green-100 text-green-800 hover:bg-green-200',
+  failed: 'bg-red-100 text-red-800 hover:bg-red-200',
+};
+
 export default function Calendar({ scheduledPosts, onDateSelect, onPostClick }: CalendarProps) {
   const [currentDate, setCurrentDate] = useState(new Date());
-  const [view, setView] = useState<'month' | 'week'>('month');
 
   const monthStart = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
   const monthEnd = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0);
@@ -126,7 +133,7 @@ export default function Calendar({ scheduledPosts, onDateSelect, onPostClick }: 
                   <button
                     key={post.id}
                     onClick={() => onPostClick(post)}
-                    className="w-full text-left text-xs p-1 bg-blue-100 text-blue-800 rounded truncate hover:bg-blue-200"
+                    className={`w-full text-left text-xs p-1 rounded truncate ${statusColors[post.status] || 'bg-gray-100 text-gray-800 hover:bg-gray-200'}`}
                   >
                     {new Date(post.scheduledAt).toLocaleTimeString([], {
                       hour: '2-digit',

@@ -26,11 +26,14 @@ export async function DELETE(
       return NextResponse.json({ error: 'Schedule not found' }, { status: 404 });
     }
 
-    // Update the post status back to draft
-    await prisma.post.update({
-      where: { id: schedule.postId },
-      data: { status: 'draft' },
-    });
+    // Only reset post to draft if it hasn't been published yet
+    const post = await prisma.post.findUnique({ where: { id: schedule.postId } });
+    if (post && post.status !== 'published') {
+      await prisma.post.update({
+        where: { id: schedule.postId },
+        data: { status: 'draft' },
+      });
+    }
 
     // Delete the schedule
     await prisma.schedule.delete({
