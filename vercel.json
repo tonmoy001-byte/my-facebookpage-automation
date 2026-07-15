@@ -4,19 +4,6 @@
   "outputDirectory": ".next",
   "framework": "nextjs",
   "installCommand": "npm install",
-  "env": {
-    "DATABASE_URL": "@database-url",
-    "JWT_SECRET": "@jwt-secret",
-    "OPENROUTER_API_KEY": "@openrouter-api-key",
-    "CLOUDINARY_CLOUD_NAME": "@cloudinary-cloud-name",
-    "CLOUDINARY_API_KEY": "@cloudinary-api-key",
-    "CLOUDINARY_API_SECRET": "@cloudinary-api-secret",
-    "SENDGRID_API_KEY": "@sendgrid-api-key",
-    "FROM_EMAIL": "@from-email",
-    "WEBHOOK_VERIFY_TOKEN": "@webhook-verify-token",
-    "CRON_SECRET": "@cron-secret",
-    "NEXT_PUBLIC_APP_URL": "@app-url"
-  },
   "crons": [
     {
       "path": "/api/schedule/process",
