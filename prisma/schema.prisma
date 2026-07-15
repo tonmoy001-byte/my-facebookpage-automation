@@ -1,0 +1,154 @@
+// Facebook Automation SaaS - Database Schema
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  passwordHash  String
+  name          String
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  // Relations
+  facebookPage  FacebookPage?
+  posts         Post[]
+  schedules     Schedule[]
+  replyRules    ReplyRule[]
+  analytics     Analytics[]
+}
+
+model FacebookPage {
+  id              String   @id @default(cuid())
+  userId          String   @unique
+  pageId          String   @unique
+  pageName        String
+  accessToken     String   // Encrypted
+  webhookToken    String
+  connectedAt     DateTime @default(now())
+
+  // Relations
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  posts           Post[]
+  comments        Comment[]
+}
+
+model Post {
+  id              String   @id @default(cuid())
+  userId          String
+  pageId          String
+  content         String   // Caption text
+  mediaUrls       String[] // Cloudinary URLs
+  mediaType       String   @default("text") // "text", "image", "video"
+  brandVoice      String   @default("professional") // Template name used
+  status          String   @default("draft") // draft, scheduled, published, failed
+  facebookPostId  String?  // ID after publishing
+  publishedAt     DateTime?
+  errorMessage    String?  // Error details if failed
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  // Relations
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  page            FacebookPage @relation(fields: [pageId], references: [id], onDelete: Cascade)
+  schedule        Schedule?
+  comments        Comment[]
+  analytics       Analytics[]
+}
+
+model Schedule {
+  id              String   @id @default(cuid())
+  postId          String   @unique
+  userId          String
+  scheduledAt     DateTime
+  status          String   @default("pending") // pending, processing, completed, failed
+  retryCount      Int      @default(0)
+  createdAt       DateTime @default(now())
+
+  // Relations
+  post            Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Comment {
+  id              String   @id @default(cuid())
+  pageId          String
+  postId          String?
+  facebookCommentId String @unique
+  authorName      String
+  authorId        String
+  content         String
+  replied         Boolean  @default(false)
+  repliedAt       DateTime?
+  createdAt       DateTime @default(now())
+
+  // Relations
+  page            FacebookPage @relation(fields: [pageId], references: [id], onDelete: Cascade)
+  post            Post?    @relation(fields: [postId], references: [id], onDelete: SetNull)
+}
+
+model ReplyRule {
+  id              String   @id @default(cuid())
+  userId          String
+  name            String
+  description     String?
+  isActive        Boolean  @default(true)
+
+  // Rule conditions
+  type            String   // "keyword", "sentiment", "time"
+  keywords        String[] // For keyword type
+  sentiment       String?  // "positive", "negative", "neutral"
+  startTime       String?  // HH:MM format
+  endTime         String?  // HH:MM format
+  daysOfWeek      String[] // ["mon", "tue", "wed", etc.]
+
+  // Action
+  action          String   @default("reply") // "reply", "skip", "flag"
+  replyTemplate   String?  // Custom reply template
+
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  // Relations
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Analytics {
+  id              String   @id @default(cuid())
+  userId          String
+  postId          String
+  postType        String   @default("post") // "post", "comment_reply"
+
+  // Metrics
+  likes           Int      @default(0)
+  comments        Int      @default(0)
+  shares          Int      @default(0)
+  reach           Int      @default(0)
+
+  collectedAt     DateTime @default(now())
+
+  // Relations
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  post            Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+}
+
+model BrandVoice {
+  id              String   @id @default(cuid())
+  name            String   @unique
+  slug            String   @unique
+  description     String
+  tone            String   // "professional", "casual", "friendly", etc.
+  styleGuide      String   // Detailed style instructions
+  examples        String[] // Example posts
+  isDefault       Boolean  @default(false)
+
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
