@@ -94,6 +94,18 @@ export default function CreatePostPage() {
 
     setSaving(true);
     try {
+      // Convert local datetime-local value to ISO with timezone offset
+      // e.g. "2026-07-15T18:53" → "2026-07-15T18:53:00+06:00"
+      let isoScheduledAt = null;
+      if (status === 'scheduled' && scheduledAt) {
+        const localDate = new Date(scheduledAt);
+        const offset = -localDate.getTimezoneOffset();
+        const sign = offset >= 0 ? '+' : '-';
+        const h = Math.floor(Math.abs(offset) / 60).toString().padStart(2, '0');
+        const m = (Math.abs(offset) % 60).toString().padStart(2, '0');
+        isoScheduledAt = scheduledAt + ':00' + sign + h + ':' + m;
+      }
+
       const response = await fetch('/api/posts', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) },
@@ -102,7 +114,7 @@ export default function CreatePostPage() {
           hashtags,
           imageUrl,
           brandVoiceId: selectedVoice || null,
-          scheduledAt: status === 'scheduled' ? scheduledAt : null,
+          scheduledAt: isoScheduledAt,
         }),
       });
 
