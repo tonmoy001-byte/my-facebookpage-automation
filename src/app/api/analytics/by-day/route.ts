@@ -13,7 +13,7 @@ export async function GET(request: Request) {
     const url = new URL(request.url);
     const days = parseInt(url.searchParams.get('days') || '30');
 
-    const engagement = await getEngagementByDay(user.id, days);
+    const engagement = await getEngagementByDay(user.id, user.tenantId, days);
 
     return NextResponse.json({ engagement });
   } catch (error: any) {

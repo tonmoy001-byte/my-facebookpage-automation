@@ -13,7 +13,7 @@ export async function GET(request: Request) {
     const url = new URL(request.url);
     const days = parseInt(url.searchParams.get('days') || '30');
 
-    const stats = await getSummaryStats(user.id, days);
+    const stats = await getSummaryStats(user.id, user.tenantId, days);
 
     return NextResponse.json({ stats });
   } catch (error: any) {

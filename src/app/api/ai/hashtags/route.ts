@@ -19,7 +19,7 @@ export async function POST(request: Request) {
       );
     }
 
-    const hashtags = await suggestHashtags(description, count || 5);
+    const hashtags = await suggestHashtags(description, count || 5, user.tenantId);
 
     return NextResponse.json({ hashtags });
   } catch (error: any) {

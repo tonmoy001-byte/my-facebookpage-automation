@@ -1,7 +1,7 @@
 // @ts-nocheck
 import { NextResponse } from 'next/server';
 import { getCurrentUser } from '@/lib/auth';
-import { prisma } from '@/lib/prisma';
+import { prisma, tenantWhere } from '@/lib/prisma';
 
 export async function GET(request: Request) {
   try {
@@ -10,8 +10,14 @@ export async function GET(request: Request) {
       return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
     }
 
+    // Return global brand voices + tenant-specific brand voices
     const voices = await prisma.brandVoice.findMany({
-      where: { userId: user.id },
+      where: {
+        OR: [
+          { isGlobal: true },
+          { tenantId: user.tenantId },
+        ],
+      },
       orderBy: { name: 'asc' },
     });
 
@@ -32,7 +38,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
     }
 
-    const { name, description, tone, examples } = await request.json();
+    const { name, description, tone, styleGuide, examples } = await request.json();
 
     if (!name || !description) {
       return NextResponse.json(
@@ -41,13 +47,19 @@ export async function POST(request: Request) {
       );
     }
 
+    const slug = name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+
     const voice = await prisma.brandVoice.create({
       data: {
-        userId: user.id,
         name,
+        slug,
         description,
         tone: tone || 'professional',
+        styleGuide: styleGuide || '',
         examples: examples || [],
+        isDefault: false,
+        isGlobal: false,
+        tenantId: user.tenantId,
       },
     });
 

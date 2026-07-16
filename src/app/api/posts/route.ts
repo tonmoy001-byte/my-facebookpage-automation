@@ -1,7 +1,7 @@
 // @ts-nocheck
 import { NextResponse } from 'next/server';
 import { getCurrentUser } from '@/lib/auth';
-import { prisma } from '@/lib/prisma';
+import { prisma, tenantWhere, tenantData } from '@/lib/prisma';
 
 export async function GET(request: Request) {
   try {
@@ -15,17 +15,15 @@ export async function GET(request: Request) {
     const limit = parseInt(url.searchParams.get('limit') || '20');
     const offset = parseInt(url.searchParams.get('offset') || '0');
 
-    const where: any = { userId: user.id };
-    if (status) {
-      where.status = status;
-    }
+    const where: any = tenantWhere(user.tenantId, { userId: user.id });
+    if (status) where.status = status;
 
     const [posts, total] = await Promise.all([
       prisma.post.findMany({
         where,
         include: {
-          brandVoice: true,
-          schedules: true,
+          brandVoiceRel: true,
+          publishJob: true,
         },
         orderBy: { createdAt: 'desc' },
         take: limit,
@@ -51,18 +49,15 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
     }
 
-    const { caption, hashtags, imageUrl, brandVoiceId, scheduledAt } = await request.json();
+    const { caption, hashtags, imageUrl, mediaUrls, brandVoiceId, scheduledAt, timezone } = await request.json();
 
     if (!caption) {
-      return NextResponse.json(
-        { error: 'Caption is required' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Caption is required' }, { status: 400 });
     }
 
-    // Get the user's connected Facebook page
+    // Get the user's connected Facebook page (tenant-scoped)
     const page = await prisma.facebookPage.findFirst({
-      where: { userId: user.id },
+      where: tenantWhere(user.tenantId, { userId: user.id }),
     });
 
     if (!page) {
@@ -72,32 +67,49 @@ export async function POST(request: Request) {
       );
     }
 
-    // Build content with hashtags appended
+    // Build content with hashtags
     const hashtagText = hashtags?.length ? '\n\n' + hashtags.map((h: string) => `#${h}`).join(' ') : '';
     const content = caption + hashtagText;
 
+    // Build media URLs
+    const finalMediaUrls = mediaUrls || (imageUrl ? [imageUrl] : []);
+    const mediaType = finalMediaUrls.length > 0
+      ? (finalMediaUrls[0].includes('.mp4') || finalMediaUrls[0].includes('video') ? 'video' : 'image')
+      : 'text';
+
     // Create the post
     const post = await prisma.post.create({
-      data: {
+      data: tenantData(user.tenantId, {
         userId: user.id,
         pageId: page.id,
         content,
-        mediaUrls: imageUrl ? [imageUrl] : [],
-        mediaType: imageUrl ? 'image' : 'text',
+        mediaUrls: finalMediaUrls,
+        mediaType,
         brandVoice: brandVoiceId || 'professional',
         status: scheduledAt ? 'scheduled' : 'draft',
-      },
+      }),
     });
 
-    // Create schedule if provided
+    // Create PublishJob + enqueue if scheduled
     if (scheduledAt) {
-      await prisma.schedule.create({
+      const scheduledDate = new Date(scheduledAt);
+
+      const publishJob = await prisma.publishJob.create({
         data: {
           postId: post.id,
           userId: user.id,
-          scheduledAt: new Date(scheduledAt),
+          tenantId: user.tenantId,
+          scheduledAt: scheduledDate,
+          timezone: timezone || 'UTC',
         },
       });
+
+      try {
+        const { schedulePublishJob } = await import('@/lib/queue');
+        await schedulePublishJob(publishJob.id, scheduledDate);
+      } catch (e) {
+        console.warn('Redis not available, cron will handle:', e);
+      }
     }
 
     return NextResponse.json({ post }, { status: 201 });

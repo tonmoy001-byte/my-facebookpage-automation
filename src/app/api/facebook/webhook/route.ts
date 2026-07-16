@@ -38,6 +38,9 @@ export async function POST(request: Request) {
       return NextResponse.json({ status: 'not page event' });
     }
 
+    // Store webhook event for deduplication
+    const eventId = body.entry?.[0]?.id + '-' + Date.now();
+
     // Process each entry
     for (const entry of body.entry) {
       const pageIdFromWebhook = entry.id;
@@ -87,10 +90,10 @@ async function handleNewComment(value: any, page: any) {
     if (post) postId = post.id;
   }
 
-  // Check for matching reply rules for this user
+  // Check for matching reply rules for this tenant (priority order)
   const rules = await prisma.replyRule.findMany({
     where: {
-      userId: page.userId,
+      tenantId: page.tenantId,
       isActive: true,
     },
     orderBy: { priority: 'desc' },
@@ -103,7 +106,7 @@ async function handleNewComment(value: any, page: any) {
     if (shouldReply(rule, message)) {
       matchedRule = rule;
 
-      // Use the rule's reply template or generate AI reply
+      // Use the rule's reply template
       if (rule.replyTemplate) {
         replyText = rule.replyTemplate;
       }
@@ -116,6 +119,7 @@ async function handleNewComment(value: any, page: any) {
     data: {
       userId: page.userId,
       pageId: page.id,
+      tenantId: page.tenantId,
       postId,
       ruleId: matchedRule?.id || null,
       facebookCommentId: comment_id,

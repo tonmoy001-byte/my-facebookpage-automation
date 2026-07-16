@@ -1,7 +1,7 @@
 // @ts-nocheck
 import { NextResponse } from 'next/server';
 import { getCurrentUser } from '@/lib/auth';
-import { prisma } from '@/lib/prisma';
+import { prisma, tenantWhere } from '@/lib/prisma';
 
 export async function GET(request: Request) {
   try {
@@ -11,7 +11,7 @@ export async function GET(request: Request) {
     }
 
     const pages = await prisma.facebookPage.findMany({
-      where: { userId: user.id },
+      where: tenantWhere(user.tenantId, { userId: user.id }),
       select: {
         id: true,
         pageId: true,

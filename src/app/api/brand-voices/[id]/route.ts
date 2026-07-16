@@ -1,7 +1,7 @@
 // @ts-nocheck
 import { NextResponse } from 'next/server';
 import { getCurrentUser } from '@/lib/auth';
-import { prisma } from '@/lib/prisma';
+import { prisma, tenantWhere } from '@/lib/prisma';
 
 export async function GET(
   request: Request,
@@ -18,7 +18,10 @@ export async function GET(
     const voice = await prisma.brandVoice.findFirst({
       where: {
         id,
-        userId: user.id,
+        OR: [
+          { isGlobal: true },
+          { tenantId: user.tenantId },
+        ],
       },
     });
 
@@ -47,12 +50,14 @@ export async function PUT(
     }
 
     const { id } = await params;
-    const { name, description, tone, examples } = await request.json();
+    const { name, description, tone, styleGuide, examples } = await request.json();
 
+    // Only allow editing tenant-specific or owned voices, not global ones
     const voice = await prisma.brandVoice.findFirst({
       where: {
         id,
-        userId: user.id,
+        tenantId: user.tenantId,
+        isGlobal: false,
       },
     });
 
@@ -66,6 +71,7 @@ export async function PUT(
         name: name || voice.name,
         description: description || voice.description,
         tone: tone || voice.tone,
+        styleGuide: styleGuide || voice.styleGuide,
         examples: examples || voice.examples,
       },
     });
@@ -95,7 +101,8 @@ export async function DELETE(
     const voice = await prisma.brandVoice.findFirst({
       where: {
         id,
-        userId: user.id,
+        tenantId: user.tenantId,
+        isGlobal: false,
       },
     });
 
@@ -103,9 +110,7 @@ export async function DELETE(
       return NextResponse.json({ error: 'Brand voice not found' }, { status: 404 });
     }
 
-    await prisma.brandVoice.delete({
-      where: { id },
-    });
+    await prisma.brandVoice.delete({ where: { id } });
 
     return NextResponse.json({ message: 'Brand voice deleted successfully' });
   } catch (error: any) {

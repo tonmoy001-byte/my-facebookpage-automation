@@ -1,7 +1,7 @@
 // @ts-nocheck
 import { NextResponse } from 'next/server';
 import { getCurrentUser } from '@/lib/auth';
-import { prisma } from '@/lib/prisma';
+import { prisma, tenantWhere, tenantData } from '@/lib/prisma';
 
 export async function GET(request: Request) {
   try {
@@ -11,7 +11,7 @@ export async function GET(request: Request) {
     }
 
     const rules = await prisma.replyRule.findMany({
-      where: { userId: user.id },
+      where: tenantWhere(user.tenantId, { userId: user.id }),
       orderBy: { priority: 'desc' },
     });
 
@@ -40,15 +40,14 @@ export async function POST(request: Request) {
       daysOfWeek,
       startTime,
       endTime,
-      responseTemplate,
-      useAI,
-      brandVoiceId,
+      replyTemplate,
+      action,
       priority,
     } = await request.json();
 
-    if (!name || !type || !responseTemplate) {
+    if (!name || !type) {
       return NextResponse.json(
-        { error: 'Name, type, and response template are required' },
+        { error: 'Name and type are required' },
         { status: 400 }
       );
     }
@@ -77,13 +76,13 @@ export async function POST(request: Request) {
 
     // Get the highest priority to set new rule at top
     const highestPriority = await prisma.replyRule.findFirst({
-      where: { userId: user.id },
+      where: tenantWhere(user.tenantId, { userId: user.id }),
       orderBy: { priority: 'desc' },
       select: { priority: true },
     });
 
     const rule = await prisma.replyRule.create({
-      data: {
+      data: tenantData(user.tenantId, {
         userId: user.id,
         name,
         type,
@@ -92,11 +91,10 @@ export async function POST(request: Request) {
         daysOfWeek: daysOfWeek || [],
         startTime,
         endTime,
-        responseTemplate,
-        useAI: useAI || false,
-        brandVoiceId: brandVoiceId || null,
+        replyTemplate: replyTemplate || null,
+        action: action || 'reply',
         priority: priority || (highestPriority?.priority || 0) + 1,
-      },
+      }),
     });
 
     return NextResponse.json({ rule }, { status: 201 });

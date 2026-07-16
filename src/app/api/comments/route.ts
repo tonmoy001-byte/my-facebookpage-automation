@@ -1,7 +1,7 @@
 // @ts-nocheck
 import { NextResponse } from 'next/server';
 import { getCurrentUser } from '@/lib/auth';
-import { prisma } from '@/lib/prisma';
+import { prisma, tenantWhere } from '@/lib/prisma';
 
 export async function GET(request: Request) {
   try {
@@ -15,9 +15,7 @@ export async function GET(request: Request) {
     const limit = parseInt(url.searchParams.get('limit') || '20');
     const offset = parseInt(url.searchParams.get('offset') || '0');
 
-    const where: any = {
-      userId: user.id,
-    };
+    const where: any = tenantWhere(user.tenantId, { userId: user.id });
 
     if (status) {
       where.status = status;

@@ -1,7 +1,7 @@
 // @ts-nocheck
 import { NextResponse } from 'next/server';
 import { getCurrentUser } from '@/lib/auth';
-import { prisma } from '@/lib/prisma';
+import { prisma, tenantWhere } from '@/lib/prisma';
 
 export async function GET(
   request: Request,
@@ -16,10 +16,7 @@ export async function GET(
     const { id } = await params;
 
     const rule = await prisma.replyRule.findFirst({
-      where: {
-        id,
-        userId: user.id,
-      },
+      where: tenantWhere(user.tenantId, { id, userId: user.id }),
     });
 
     if (!rule) {
@@ -55,18 +52,14 @@ export async function PUT(
       daysOfWeek,
       startTime,
       endTime,
-      responseTemplate,
-      useAI,
-      brandVoiceId,
+      replyTemplate,
+      action,
       priority,
       isActive,
     } = await request.json();
 
     const rule = await prisma.replyRule.findFirst({
-      where: {
-        id,
-        userId: user.id,
-      },
+      where: tenantWhere(user.tenantId, { id, userId: user.id }),
     });
 
     if (!rule) {
@@ -83,9 +76,8 @@ export async function PUT(
         daysOfWeek: daysOfWeek || rule.daysOfWeek,
         startTime: startTime || rule.startTime,
         endTime: endTime || rule.endTime,
-        responseTemplate: responseTemplate || rule.responseTemplate,
-        useAI: useAI !== undefined ? useAI : rule.useAI,
-        brandVoiceId: brandVoiceId || rule.brandVoiceId,
+        replyTemplate: replyTemplate || rule.replyTemplate,
+        action: action || rule.action,
         priority: priority || rule.priority,
         isActive: isActive !== undefined ? isActive : rule.isActive,
       },
@@ -114,10 +106,7 @@ export async function DELETE(
     const { id } = await params;
 
     const rule = await prisma.replyRule.findFirst({
-      where: {
-        id,
-        userId: user.id,
-      },
+      where: tenantWhere(user.tenantId, { id, userId: user.id }),
     });
 
     if (!rule) {

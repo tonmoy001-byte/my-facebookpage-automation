@@ -1,5 +1,5 @@
 // @ts-nocheck
-import { prisma } from './prisma';
+import { prisma, tenantWhere } from './prisma';
 import { createFacebookService } from './facebook';
 
 export interface PostMetrics {
@@ -34,7 +34,6 @@ export async function collectPostMetrics(postId: string): Promise<PostMetrics | 
     const fbService = createFacebookService(post.page.accessToken, post.page.pageId);
     const insights = await fbService.getPostInsights(post.facebookPostId);
 
-    // Parse Facebook Insights response
     const metrics: PostMetrics = {
       postId,
       impressions: 0,
@@ -67,31 +66,16 @@ export async function collectPostMetrics(postId: string): Promise<PostMetrics | 
     metrics.engagement = metrics.likes + metrics.comments + metrics.shares;
 
     // Store metrics in database
-    await prisma.analytics.upsert({
-      where: {
-        postId_date: {
-          postId,
-          date: new Date().toISOString().split('T')[0],
-        },
-      },
-      update: {
-        impressions: metrics.impressions,
-        reach: metrics.reach,
-        engagement: metrics.engagement,
-        likes: metrics.likes,
-        comments: metrics.comments,
-        shares: metrics.shares,
-      },
-      create: {
+    await prisma.analytics.create({
+      data: {
         postId,
         userId: post.userId,
-        date: new Date().toISOString().split('T')[0],
-        impressions: metrics.impressions,
-        reach: metrics.reach,
-        engagement: metrics.engagement,
+        tenantId: post.tenantId,
+        postType: 'post',
         likes: metrics.likes,
         comments: metrics.comments,
         shares: metrics.shares,
+        reach: metrics.reach,
       },
     });
 
@@ -102,46 +86,19 @@ export async function collectPostMetrics(postId: string): Promise<PostMetrics | 
   }
 }
 
-// Collect page-level metrics
-export async function collectPageMetrics(pageId: string): Promise<PageMetrics | null> {
-  try {
-    const page = await prisma.facebookPage.findUnique({
-      where: { id: pageId },
-    });
-
-    if (!page) return null;
-
-    const fbService = createFacebookService(page.accessToken, page.pageId);
-    const stats = await fbService.getPageStats();
-
-    const metrics: PageMetrics = {
-      pageId,
-      date: new Date().toISOString().split('T')[0],
-      followers: stats.fan_count || 0,
-      reach: stats.talking_about_count || 0,
-      impressions: 0,
-      engagement: 0,
-    };
-
-    return metrics;
-  } catch (error) {
-    console.error(`Failed to collect page metrics for ${pageId}:`, error);
-    return null;
-  }
-}
-
-// Get analytics for a user with date filtering
+// Get analytics for a user with date filtering (tenant-scoped)
 export async function getAnalytics(
   userId: string,
+  tenantId: string,
   startDate?: string,
   endDate?: string
 ) {
-  const where: any = { userId };
+  const where: any = tenantWhere(tenantId, { userId });
 
   if (startDate || endDate) {
-    where.date = {};
-    if (startDate) where.date.gte = startDate;
-    if (endDate) where.date.lte = endDate;
+    where.collectedAt = {};
+    if (startDate) where.collectedAt.gte = new Date(startDate);
+    if (endDate) where.collectedAt.lte = new Date(endDate);
   }
 
   const analytics = await prisma.analytics.findMany({
@@ -156,30 +113,30 @@ export async function getAnalytics(
         },
       },
     },
-    orderBy: { date: 'desc' },
+    orderBy: { collectedAt: 'desc' },
   });
 
   return analytics;
 }
 
-// Get summary stats for a user
-export async function getSummaryStats(userId: string, days: number = 30) {
+// Get summary stats for a user (tenant-scoped)
+export async function getSummaryStats(userId: string, tenantId: string, days: number = 30) {
   const startDate = new Date();
   startDate.setDate(startDate.getDate() - days);
-  const startDateStr = startDate.toISOString().split('T')[0];
+
+  const where = tenantWhere(tenantId, { userId });
 
   const [totalPosts, publishedPosts, scheduledPosts, totalAnalytics] = await Promise.all([
-    prisma.post.count({ where: { userId } }),
-    prisma.post.count({ where: { userId, status: 'published' } }),
-    prisma.post.count({ where: { userId, status: 'scheduled' } }),
+    prisma.post.count({ where }),
+    prisma.post.count({ where: { ...where, status: 'published' } }),
+    prisma.post.count({ where: { ...where, status: 'scheduled' } }),
     prisma.analytics.aggregate({
       where: {
-        userId,
-        date: { gte: startDateStr },
+        ...where,
+        collectedAt: { gte: startDate },
       },
       _sum: {
-        impressions: true,
-        engagement: true,
+        reach: true,
         likes: true,
         comments: true,
         shares: true,
@@ -191,31 +148,28 @@ export async function getSummaryStats(userId: string, days: number = 30) {
     totalPosts,
     publishedPosts,
     scheduledPosts,
-    totalImpressions: totalAnalytics._sum.impressions || 0,
-    totalEngagement: totalAnalytics._sum.engagement || 0,
+    totalReach: totalAnalytics._sum.reach || 0,
     totalLikes: totalAnalytics._sum.likes || 0,
     totalComments: totalAnalytics._sum.comments || 0,
     totalShares: totalAnalytics._sum.shares || 0,
+    totalEngagement: (totalAnalytics._sum.likes || 0) + (totalAnalytics._sum.comments || 0) + (totalAnalytics._sum.shares || 0),
   };
 }
 
-// Get top performing posts
-export async function getTopPosts(userId: string, limit: number = 5) {
+// Get top performing posts (tenant-scoped)
+export async function getTopPosts(userId: string, tenantId: string, limit: number = 5) {
+  const where = tenantWhere(tenantId, { userId, status: 'published' });
+
   const posts = await prisma.post.findMany({
-    where: {
-      userId,
-      status: 'published',
-    },
+    where,
     include: {
       analytics: {
-        orderBy: { date: 'desc' },
+        orderBy: { collectedAt: 'desc' },
         take: 1,
       },
     },
     orderBy: {
-      analytics: {
-        _count: 'desc',
-      },
+      analytics: { _count: 'desc' },
     },
     take: limit,
   });
@@ -228,17 +182,16 @@ export async function getTopPosts(userId: string, limit: number = 5) {
     }));
 }
 
-// Get engagement by day of week
-export async function getEngagementByDay(userId: string, days: number = 30) {
+// Get engagement by day of week (tenant-scoped)
+export async function getEngagementByDay(userId: string, tenantId: string, days: number = 30) {
   const startDate = new Date();
   startDate.setDate(startDate.getDate() - days);
-  const startDateStr = startDate.toISOString().split('T')[0];
 
   const analytics = await prisma.analytics.findMany({
-    where: {
+    where: tenantWhere(tenantId, {
       userId,
-      date: { gte: startDateStr },
-    },
+      collectedAt: { gte: startDate },
+    }),
   });
 
   const dayStats: Record<string, { engagement: number; count: number }> = {
@@ -254,9 +207,10 @@ export async function getEngagementByDay(userId: string, days: number = 30) {
   const dayNames = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'];
 
   for (const record of analytics) {
-    const date = new Date(record.date);
+    const date = new Date(record.collectedAt);
     const dayName = dayNames[date.getDay()];
-    dayStats[dayName].engagement += record.engagement;
+    const engagement = record.likes + record.comments + record.shares;
+    dayStats[dayName].engagement += engagement;
     dayStats[dayName].count++;
   }
 

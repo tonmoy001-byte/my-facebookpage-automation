@@ -14,11 +14,11 @@ interface ReplyRule {
   priority: number;
   keywords: string[];
   sentiment?: string;
-  daysOfWeek?: string[];
+  daysOfWeek: string[];
   startTime?: string;
   endTime?: string;
-  responseTemplate: string;
-  useAI: boolean;
+  replyTemplate: string;
+  action: 'template' | 'ai_reply' | 'escalate';
 }
 
 export default function RulesPage() {
@@ -34,8 +34,8 @@ export default function RulesPage() {
     daysOfWeek: ['mon', 'tue', 'wed', 'thu', 'fri'],
     startTime: '09:00',
     endTime: '17:00',
-    responseTemplate: '',
-    useAI: false,
+    replyTemplate: '',
+    action: 'template' as 'template' | 'ai_reply' | 'escalate',
   });
   const { token } = useAuth();
 
@@ -99,8 +99,8 @@ export default function RulesPage() {
       daysOfWeek: rule.daysOfWeek || [],
       startTime: rule.startTime || '09:00',
       endTime: rule.endTime || '17:00',
-      responseTemplate: rule.responseTemplate,
-      useAI: rule.useAI,
+      replyTemplate: rule.replyTemplate,
+      action: rule.action,
     });
     setShowForm(true);
   };
@@ -147,8 +147,8 @@ export default function RulesPage() {
       daysOfWeek: ['mon', 'tue', 'wed', 'thu', 'fri'],
       startTime: '09:00',
       endTime: '17:00',
-      responseTemplate: '',
-      useAI: false,
+      replyTemplate: '',
+      action: 'template',
     });
     setEditingRule(null);
     setShowForm(false);
@@ -351,12 +351,12 @@ export default function RulesPage() {
 
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Response Template
+                      Reply Template
                     </label>
                     <textarea
-                      value={formData.responseTemplate}
+                      value={formData.replyTemplate}
                       onChange={(e) =>
-                        setFormData({ ...formData, responseTemplate: e.target.value })
+                        setFormData({ ...formData, replyTemplate: e.target.value })
                       }
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 h-24"
                       placeholder="Thanks for your comment! {name}"
@@ -364,19 +364,21 @@ export default function RulesPage() {
                     />
                   </div>
 
-                  <div className="flex items-center">
-                    <input
-                      type="checkbox"
-                      id="useAI"
-                      checked={formData.useAI}
-                      onChange={(e) =>
-                        setFormData({ ...formData, useAI: e.target.checked })
-                      }
-                      className="mr-2"
-                    />
-                    <label htmlFor="useAI" className="text-sm text-gray-700">
-                      Use AI to generate response (overrides template)
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Action
                     </label>
+                    <select
+                      value={formData.action}
+                      onChange={(e) =>
+                        setFormData({ ...formData, action: e.target.value as any })
+                      }
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                    >
+                      <option value="template">Use Template</option>
+                      <option value="ai_reply">AI Generated Reply</option>
+                      <option value="escalate">Escalate (No Reply)</option>
+                    </select>
                   </div>
 
                   <div className="flex gap-4 pt-4">
@@ -431,8 +433,8 @@ export default function RulesPage() {
                         </span>
                       </div>
                       <p className="text-sm text-gray-600 mt-1">
-                        {rule.responseTemplate.substring(0, 100)}
-                        {rule.responseTemplate.length > 100 && '...'}
+                        {rule.replyTemplate.substring(0, 100)}
+                        {rule.replyTemplate.length > 100 && '...'}
                       </p>
                       {rule.type === 'keyword' && rule.keywords.length > 0 && (
                         <div className="flex flex-wrap gap-1 mt-2">

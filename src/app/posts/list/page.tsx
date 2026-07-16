@@ -14,9 +14,10 @@ interface Post {
   status: string;
   brandVoice?: string;
   createdAt: string;
-  schedules?: {
+  publishJob?: {
     scheduledAt: string;
-  }[];
+    status: string;
+  };
 }
 
 export default function PostsListPage() {
@@ -185,9 +186,9 @@ export default function PostsListPage() {
                   </div>
                 </div>
                 <div className="mt-4 text-xs text-gray-500">
-                  {post.schedules?.[0]?.scheduledAt
+                  {post.publishJob?.scheduledAt
                     ? `Scheduled for ${new Date(
-                        post.schedules[0].scheduledAt
+                        post.publishJob.scheduledAt
                       ).toLocaleString()}`
                     : `Created ${new Date(post.createdAt).toLocaleDateString()}`}
                 </div>

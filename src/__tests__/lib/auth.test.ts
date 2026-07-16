@@ -36,9 +36,10 @@ describe('Auth Utils', () => {
   });
 
   describe('generateToken', () => {
-    it('should generate a JWT token', () => {
+    it('should generate a JWT token with tenantId', () => {
       const userId = 'user123';
-      const token = generateToken(userId);
+      const tenantId = 'tenant1';
+      const token = generateToken(userId, tenantId);
       expect(token).toBeDefined();
       expect(typeof token).toBe('string');
       expect(token.split('.')).toHaveLength(3);
@@ -46,12 +47,14 @@ describe('Auth Utils', () => {
   });
 
   describe('verifyToken', () => {
-    it('should verify a valid token', () => {
+    it('should verify a valid token and return tenantId', () => {
       const userId = 'user123';
-      const token = generateToken(userId);
+      const tenantId = 'tenant1';
+      const token = generateToken(userId, tenantId);
       const payload = verifyToken(token);
       expect(payload).toBeDefined();
       expect(payload?.userId).toBe(userId);
+      expect(payload?.tenantId).toBe(tenantId);
     });
 
     it('should return null for invalid token', () => {

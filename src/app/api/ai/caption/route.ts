@@ -21,6 +21,7 @@ export async function POST(request: Request) {
     }
 
     const result = await generateCaption({
+      tenantId: user.tenantId,
       imageUrl,
       description,
       brandVoice,

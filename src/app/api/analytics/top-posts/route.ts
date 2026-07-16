@@ -13,7 +13,7 @@ export async function GET(request: Request) {
     const url = new URL(request.url);
     const limit = parseInt(url.searchParams.get('limit') || '5');
 
-    const posts = await getTopPosts(user.id, limit);
+    const posts = await getTopPosts(user.id, user.tenantId, limit);
 
     return NextResponse.json({ posts });
   } catch (error: any) {

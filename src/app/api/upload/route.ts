@@ -1,7 +1,29 @@
 // @ts-nocheck
 import { NextResponse } from 'next/server';
 import { getCurrentUser } from '@/lib/auth';
-import { uploadImage, uploadVideo } from '@/lib/cloudinary';
+import { prisma, tenantData } from '@/lib/prisma';
+import { uploadToR2, generateMediaKey, isR2Configured } from '@/lib/storage';
+
+// Cloudinary fallback (existing setup)
+async function uploadToCloudinary(buffer: Buffer, folder: string, resourceType: string) {
+  const { v2: cloudinary } = await import('cloudinary');
+  cloudinary.config({
+    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+    api_key: process.env.CLOUDINARY_API_KEY,
+    api_secret: process.env.CLOUDINARY_API_SECRET,
+  });
+
+  return new Promise((resolve, reject) => {
+    const stream = cloudinary.uploader.upload_stream(
+      { folder, resource_type: resourceType },
+      (error: any, result: any) => {
+        if (error) reject(error);
+        else resolve(result);
+      }
+    );
+    stream.end(buffer);
+  });
+}
 
 export async function POST(request: Request) {
   try {
@@ -17,20 +39,46 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'No file provided' }, { status: 400 });
     }
 
-    // Convert file to buffer
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
-
-    // Determine file type and upload
     const isVideo = file.type.startsWith('video/');
-    const uploadFn = isVideo ? uploadVideo : uploadImage;
+    const resourceType = isVideo ? 'video' : 'image';
 
-    const result = await uploadFn(buffer, `fb-autopost/${user.id}`);
+    let url: string;
+    let key: string;
+
+    if (isR2Configured()) {
+      // Upload to Cloudflare R2
+      key = generateMediaKey(user.id, file.name, isVideo ? 'video' : 'image');
+      const r2Result = await uploadToR2(buffer, key, file.type);
+      url = r2Result.url;
+    } else {
+      // Fallback to Cloudinary
+      const result = await uploadToCloudinary(buffer, `fb-saas/${user.id}`, resourceType);
+      url = result.secure_url;
+      key = result.public_id;
+    }
+
+    // Create MediaAsset record
+    const mediaAsset = await prisma.mediaAsset.create({
+      data: tenantData(user.tenantId, {
+        userId: user.id,
+        fileName: file.name,
+        fileKey: key,
+        fileUrl: url,
+        fileType: file.type,
+        fileSize: file.size,
+        mimeType: file.type,
+        resourceType: isVideo ? 'video' : 'image',
+        storageProvider: isR2Configured() ? 'r2' : 'cloudinary',
+      }),
+    });
 
     return NextResponse.json({
-      url: result.secure_url,
-      publicId: result.public_id,
+      url,
+      key,
       type: isVideo ? 'video' : 'image',
+      mediaAssetId: mediaAsset.id,
     });
   } catch (error: any) {
     console.error('Upload error:', error);

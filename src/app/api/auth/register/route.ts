@@ -19,8 +19,8 @@ export async function POST(request: Request) {
       );
     }
 
-    const user = await createUser(email, password, name);
-    return NextResponse.json({ user }, { status: 201 });
+    const result = await createUser(email, password, name);
+    return NextResponse.json({ user: result }, { status: 201 });
   } catch (error: any) {
     if (error.message === 'User already exists') {
       return NextResponse.json(

@@ -9,6 +9,7 @@ export interface JWTPayload {
   userId: string;
   email: string;
   name: string;
+  tenantId: string;
 }
 
 export async function hashPassword(password: string): Promise<string> {
@@ -38,15 +39,64 @@ export async function createUser(email: string, password: string, name: string) 
   }
 
   const passwordHash = await hashPassword(password);
-  const user = await prisma.user.create({
-    data: { email, passwordHash, name },
+
+  // Create tenant + user + subscription in a transaction
+  const slug = name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') + '-' + Date.now().toString(36);
+
+  const result = await prisma.$transaction(async (tx) => {
+    // 1. Create tenant
+    const tenant = await tx.tenant.create({
+      data: {
+        name: `${name}'s Workspace`,
+        slug,
+      },
+    });
+
+    // 2. Create user
+    const user = await tx.user.create({
+      data: {
+        email,
+        passwordHash,
+        name,
+        tenantId: tenant.id,
+      },
+    });
+
+    // 3. Create starter subscription
+    await tx.subscription.create({
+      data: {
+        tenantId: tenant.id,
+        plan: 'starter',
+        status: 'active',
+      },
+    });
+
+    // 4. Create default AI settings
+    await tx.aISettings.create({
+      data: {
+        tenantId: tenant.id,
+        defaultProvider: 'openrouter',
+        defaultModel: 'google/gemini-2.0-flash:free',
+      },
+    });
+
+    return { user, tenant };
   });
 
-  return { id: user.id, email: user.email, name: user.name };
+  return {
+    id: result.user.id,
+    email: result.user.email,
+    name: result.user.name,
+    tenantId: result.tenant.id,
+    tenantName: result.tenant.name,
+  };
 }
 
 export async function authenticateUser(email: string, password: string) {
-  const user = await prisma.user.findUnique({ where: { email } });
+  const user = await prisma.user.findUnique({
+    where: { email },
+    include: { tenant: true },
+  });
   if (!user) {
     throw new Error('Invalid credentials');
   }
@@ -60,9 +110,19 @@ export async function authenticateUser(email: string, password: string) {
     userId: user.id,
     email: user.email,
     name: user.name,
+    tenantId: user.tenantId,
   });
 
-  return { token, user: { id: user.id, email: user.email, name: user.name } };
+  return {
+    token,
+    user: {
+      id: user.id,
+      email: user.email,
+      name: user.name,
+      tenantId: user.tenantId,
+      tenantName: user.tenant.name,
+    },
+  };
 }
 
 export function getTokenFromRequest(request: Request): string | null {
@@ -82,8 +142,20 @@ export async function getCurrentUser(request: Request) {
 
   const user = await prisma.user.findUnique({
     where: { id: payload.userId },
-    select: { id: true, email: true, name: true },
+    select: {
+      id: true,
+      email: true,
+      name: true,
+      tenantId: true,
+      tenant: { select: { id: true, name: true, slug: true } },
+    },
   });
 
   return user;
+}
+
+export async function getAuthPayload(request: Request): Promise<JWTPayload | null> {
+  const token = getTokenFromRequest(request);
+  if (!token) return null;
+  return verifyToken(token);
 }

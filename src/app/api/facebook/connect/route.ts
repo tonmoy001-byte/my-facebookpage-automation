@@ -2,7 +2,7 @@
 import { NextResponse } from 'next/server';
 import { getCurrentUser } from '@/lib/auth';
 import { encrypt } from '@/lib/encryption';
-import { prisma } from '@/lib/prisma';
+import { prisma, tenantWhere } from '@/lib/prisma';
 import axios from 'axios';
 
 export async function POST(request: Request) {
@@ -32,15 +32,15 @@ export async function POST(request: Request) {
       );
     }
 
-    // Check if user already has a page connected
-    const existingPage = await prisma.facebookPage.findUnique({
-      where: { userId: user.id },
+    // Check if user already has a page connected (tenant-scoped)
+    const existingPage = await prisma.facebookPage.findFirst({
+      where: tenantWhere(user.tenantId, { userId: user.id }),
     });
 
     if (existingPage) {
       // Update existing page
       const updatedPage = await prisma.facebookPage.update({
-        where: { userId: user.id },
+        where: { id: existingPage.id },
         data: {
           pageId,
           pageName,
@@ -50,10 +50,11 @@ export async function POST(request: Request) {
       return NextResponse.json({ page: updatedPage });
     }
 
-    // Create new page connection
+    // Create new page connection with tenant
     const page = await prisma.facebookPage.create({
       data: {
         userId: user.id,
+        tenantId: user.tenantId,
         pageId,
         pageName,
         accessToken: encrypt(accessToken),

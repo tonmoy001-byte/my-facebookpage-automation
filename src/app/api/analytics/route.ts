@@ -16,6 +16,7 @@ export async function GET(request: Request) {
 
     const analytics = await getAnalytics(
       user.id,
+      user.tenantId,
       startDate || undefined,
       endDate || undefined
     );

@@ -1,10 +1,11 @@
 // @ts-nocheck
 import axios from 'axios';
+import { prisma } from './prisma';
 
 const OPENROUTER_API_URL = 'https://openrouter.ai/api/v1/chat/completions';
-const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY;
 
 export interface GenerateCaptionOptions {
+  tenantId?: string;
   imageUrl?: string;
   description: string;
   brandVoice?: string;
@@ -37,20 +38,42 @@ const BRAND_VOICE_PROMPTS: Record<string, string> = {
   luxury: 'Write in an elegant, sophisticated tone. Emphasize exclusivity and premium quality.',
 };
 
-export async function generateCaption(options: GenerateCaptionOptions): Promise<GeneratedContent> {
-  if (!OPENROUTER_API_KEY) {
-    throw new Error('OpenRouter API key not configured');
+// Look up tenant-specific AI API key, fallback to env var
+async function getApiKey(tenantId?: string): Promise<string> {
+  if (tenantId) {
+    const credential = await prisma.aICredential.findFirst({
+      where: { tenantId, provider: 'openrouter' },
+    });
+    if (credential?.apiKey) return credential.apiKey;
   }
+  if (process.env.OPENROUTER_API_KEY) return process.env.OPENROUTER_API_KEY;
+  throw new Error('No AI API key configured. Add your OpenRouter key in Settings > AI.');
+}
 
-  const {
-    imageUrl,
-    description,
-    brandVoice = 'professional',
-    hashtags = true,
-    maxHashtags = 5,
-    tone,
-    maxLength = 500,
-  } = options;
+// Look up tenant-specific model, fallback to default
+async function getModel(tenantId?: string): Promise<string> {
+  if (tenantId) {
+    const settings = await prisma.aISettings.findUnique({ where: { tenantId } });
+    if (settings?.defaultModel) return settings.defaultModel;
+  }
+  return 'google/gemini-2.0-flash:free';
+}
+
+// Look up tenant-specific temperature
+async function getTemperature(tenantId?: string): Promise<number> {
+  if (tenantId) {
+    const settings = await prisma.aISettings.findUnique({ where: { tenantId } });
+    if (settings?.temperature != null) return settings.temperature;
+  }
+  return 0.7;
+}
+
+export async function generateCaption(options: GenerateCaptionOptions): Promise<GeneratedContent> {
+  const { tenantId, imageUrl, description, brandVoice = 'professional', hashtags = true, maxHashtags = 5, tone, maxLength = 500 } = options;
+
+  const apiKey = await getApiKey(tenantId);
+  const model = await getModel(tenantId);
+  const temperature = await getTemperature(tenantId);
 
   const voicePrompt = BRAND_VOICE_PROMPTS[brandVoice] || BRAND_VOICE_PROMPTS.professional;
   const toneInstruction = tone ? `Tone: ${tone}.` : '';
@@ -62,15 +85,11 @@ Description: ${description}
 
 Generate a Facebook post caption`;
 
-  if (imageUrl) {
-    userPrompt += ` for an image`;
-  }
+  if (imageUrl) userPrompt += ` for an image`;
 
   userPrompt += ` that is engaging and matches the brand voice. Maximum ${maxLength} characters.`;
 
-  if (hashtags) {
-    userPrompt += `\n\nAlso generate ${maxHashtags} relevant hashtags for this post.`;
-  }
+  if (hashtags) userPrompt += `\n\nAlso generate ${maxHashtags} relevant hashtags for this post.`;
 
   userPrompt += `\n\nFormat your response as JSON:
 {
@@ -81,17 +100,17 @@ Generate a Facebook post caption`;
   const response = await axios.post(
     OPENROUTER_API_URL,
     {
-      model: 'google/gemini-2.0-flash-001',
+      model,
       messages: [
         { role: 'system', content: SYSTEM_PROMPT },
         { role: 'user', content: userPrompt },
       ],
-      temperature: 0.7,
+      temperature,
       max_tokens: 1000,
     },
     {
       headers: {
-        Authorization: `Bearer ${OPENROUTER_API_KEY}`,
+        Authorization: `Bearer ${apiKey}`,
         'Content-Type': 'application/json',
         'HTTP-Referer': 'https://fb-autopost.com',
         'X-Title': 'FB Autopost SaaS',
@@ -103,18 +122,13 @@ Generate a Facebook post caption`;
 
   try {
     const parsed = JSON.parse(content);
-    return {
-      caption: parsed.caption || '',
-      hashtags: parsed.hashtags || [],
-    };
+    return { caption: parsed.caption || '', hashtags: parsed.hashtags || [] };
   } catch {
-    // If JSON parsing fails, try to extract caption and hashtags manually
     const lines = content.split('\n');
     const caption = lines
       .filter((line: string) => !line.startsWith('#') && !line.startsWith('['))
       .join(' ')
       .trim();
-
     const hashtagMatches = content.match(/#\w+/g) || [];
     return {
       caption: caption || description,
@@ -123,15 +137,15 @@ Generate a Facebook post caption`;
   }
 }
 
-export async function suggestHashtags(description: string, count: number = 5): Promise<string[]> {
-  if (!OPENROUTER_API_KEY) {
-    throw new Error('OpenRouter API key not configured');
-  }
+export async function suggestHashtags(description: string, count: number = 5, tenantId?: string): Promise<string[]> {
+  const apiKey = await getApiKey(tenantId);
+  const model = await getModel(tenantId);
+  const temperature = await getTemperature(tenantId);
 
   const response = await axios.post(
     OPENROUTER_API_URL,
     {
-      model: 'google/gemini-2.0-flash-001',
+      model,
       messages: [
         {
           role: 'user',
@@ -140,12 +154,12 @@ export async function suggestHashtags(description: string, count: number = 5): P
 Return only the hashtags as a JSON array, like: ["hashtag1", "hashtag2", "hashtag3"]`,
         },
       ],
-      temperature: 0.7,
+      temperature,
       max_tokens: 200,
     },
     {
       headers: {
-        Authorization: `Bearer ${OPENROUTER_API_KEY}`,
+        Authorization: `Bearer ${apiKey}`,
         'Content-Type': 'application/json',
       },
     }
@@ -164,18 +178,19 @@ Return only the hashtags as a JSON array, like: ["hashtag1", "hashtag2", "hashta
 
 export async function generateReply(
   comment: string,
-  brandVoice: string = 'professional'
+  brandVoice: string = 'professional',
+  tenantId?: string
 ): Promise<string> {
-  if (!OPENROUTER_API_KEY) {
-    throw new Error('OpenRouter API key not configured');
-  }
+  const apiKey = await getApiKey(tenantId);
+  const model = await getModel(tenantId);
+  const temperature = await getTemperature(tenantId);
 
   const voicePrompt = BRAND_VOICE_PROMPTS[brandVoice] || BRAND_VOICE_PROMPTS.professional;
 
   const response = await axios.post(
     OPENROUTER_API_URL,
     {
-      model: 'google/gemini-2.0-flash-001',
+      model,
       messages: [
         {
           role: 'system',
@@ -188,12 +203,12 @@ Generate a brief, appropriate reply to this comment. Keep it under 200 character
           content: `Comment: "${comment}"`,
         },
       ],
-      temperature: 0.7,
+      temperature,
       max_tokens: 200,
     },
     {
       headers: {
-        Authorization: `Bearer ${OPENROUTER_API_KEY}`,
+        Authorization: `Bearer ${apiKey}`,
         'Content-Type': 'application/json',
       },
     }
