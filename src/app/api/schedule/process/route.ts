@@ -47,6 +47,22 @@ async function processSchedules() {
 
       let result;
 
+      // Guard: mediaType expects media but none was uploaded
+      if ((post.mediaType === 'image' || post.mediaType === 'video') && !post.mediaUrls?.[0]) {
+        const errorMsg = `Post expects ${post.mediaType} but no media was uploaded`;
+        console.error(errorMsg + ` (post ${post.id})`);
+        await prisma.post.update({
+          where: { id: post.id },
+          data: { status: 'failed', errorMessage: errorMsg },
+        });
+        await prisma.schedule.update({
+          where: { id: schedule.id },
+          data: { status: 'failed', retryCount: schedule.retryCount + 1 },
+        });
+        results.push({ postId: post.id, status: 'failed', error: errorMsg });
+        continue;
+      }
+
       // Post to Facebook based on media type
       if (post.mediaType === 'video' && post.mediaUrls?.[0]) {
         result = await fbService.postVideo(post.mediaUrls[0], post.content);

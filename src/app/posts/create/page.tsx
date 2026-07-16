@@ -171,6 +171,17 @@ export default function CreatePostPage() {
               ) : (
                 <FileUpload onUpload={(url) => setImageUrl(url)} />
               )}
+              {imageUrl ? (
+                <p className="mt-2 text-sm text-green-600 flex items-center gap-1">
+                  <span className="inline-block w-2 h-2 rounded-full bg-green-500"></span>
+                  Image attached
+                </p>
+              ) : (
+                <p className="mt-2 text-sm text-gray-400 flex items-center gap-1">
+                  <span className="inline-block w-2 h-2 rounded-full bg-gray-300"></span>
+                  No image attached — post will be text only
+                </p>
+              )}
             </div>
 
             {/* Description */}
