@@ -5,9 +5,12 @@ WORKDIR /app
 # Copy worker files
 COPY worker/package.json ./
 COPY worker/prisma ./prisma/
+COPY worker/prisma.config.ts ./
 
-# Install dependencies and generate Prisma client
+# Install dependencies
 RUN npm install
+
+# Generate Prisma client
 RUN npx prisma generate
 
 # Copy worker source

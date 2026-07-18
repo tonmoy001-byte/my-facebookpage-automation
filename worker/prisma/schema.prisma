@@ -1,11 +1,11 @@
 // Copy of root schema for worker builds
+
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
 }
 
 // ─── Core Models ───────────────────────────────────────────────
@@ -18,7 +18,6 @@ model Tenant {
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
-  // Relations
   users         User[]
   facebookPages FacebookPage[]
   posts         Post[]
@@ -45,7 +44,6 @@ model User {
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 
-  // Relations
   tenant        Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   facebookPage  FacebookPage?
   posts         Post[]
@@ -54,8 +52,6 @@ model User {
 
   @@index([tenantId])
 }
-
-// ─── Facebook Integration ─────────────────────────────────────
 
 model FacebookPage {
   id              String   @id @default(cuid())
@@ -68,7 +64,6 @@ model FacebookPage {
   connectedAt     DateTime @default(now())
   updatedAt       DateTime @default(now()) @updatedAt
 
-  // Relations
   user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   tenant          Tenant?  @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   posts           Post[]
@@ -76,8 +71,6 @@ model FacebookPage {
 
   @@index([tenantId])
 }
-
-// ─── Content Models ───────────────────────────────────────────
 
 model Post {
   id              String   @id @default(cuid())
@@ -95,7 +88,6 @@ model Post {
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 
-  // Relations
   user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   tenant          Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   page            FacebookPage @relation(fields: [pageId], references: [id], onDelete: Cascade)
@@ -107,8 +99,6 @@ model Post {
   @@index([status])
   @@index([facebookPostId])
 }
-
-// ─── Queue & Publishing ───────────────────────────────────────
 
 model PublishJob {
   id           String   @id @default(cuid())
@@ -126,7 +116,6 @@ model PublishJob {
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
-  // Relations
   post         Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
   tenant       Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   attempts_log PublishAttempt[]
@@ -148,15 +137,12 @@ model PublishAttempt {
   finishedAt     DateTime?
   createdAt      DateTime  @default(now())
 
-  // Relations
   job            PublishJob @relation(fields: [jobId], references: [id], onDelete: Cascade)
   tenant         Tenant     @relation(fields: [tenantId], references: [id], onDelete: Cascade)
 
   @@index([jobId])
   @@index([tenantId])
 }
-
-// ─── Comments & Rules ────────────────────────────────────────
 
 model Comment {
   id               String    @id @default(cuid())
@@ -174,7 +160,6 @@ model Comment {
   repliedAt        DateTime?
   createdAt        DateTime  @default(now())
 
-  // Relations
   user             User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   tenant           Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   page             FacebookPage @relation(fields: [pageId], references: [id], onDelete: Cascade)
@@ -203,15 +188,12 @@ model ReplyRule {
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 
-  // Relations
   user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   tenant          Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   comments        Comment[]
 
   @@index([tenantId])
 }
-
-// ─── Analytics ───────────────────────────────────────────────
 
 model Analytics {
   id           String   @id @default(cuid())
@@ -225,15 +207,12 @@ model Analytics {
   reach        Int      @default(0)
   collectedAt  DateTime @default(now())
 
-  // Relations
   post         Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
   tenant       Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
 
   @@index([tenantId])
   @@index([collectedAt])
 }
-
-// ─── Subscriptions ───────────────────────────────────────────
 
 model Subscription {
   id              String   @id @default(cuid())
@@ -248,13 +227,10 @@ model Subscription {
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 
-  // Relations
   tenant          Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
 
   @@unique([tenantId])
 }
-
-// ─── Media Library ───────────────────────────────────────────
 
 model MediaAsset {
   id              String   @id @default(cuid())
@@ -270,13 +246,10 @@ model MediaAsset {
   storageProvider String   @default("r2")
   createdAt       DateTime @default(now())
 
-  // Relations
   tenant          Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
 
   @@index([tenantId])
 }
-
-// ─── AI Configuration ────────────────────────────────────────
 
 model AICredential {
   id          String   @id @default(cuid())
@@ -288,7 +261,6 @@ model AICredential {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  // Relations
   tenant      Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
 
   @@unique([tenantId, provider])
@@ -304,13 +276,10 @@ model AISettings {
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 
-  // Relations
   tenant          Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
 
   @@unique([tenantId])
 }
-
-// ─── Brand Voices ────────────────────────────────────────────
 
 model BrandVoice {
   id          String   @id @default(cuid())
@@ -326,13 +295,10 @@ model BrandVoice {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  // Relations
   tenant      Tenant?  @relation(fields: [tenantId], references: [id], onDelete: Cascade)
 
   @@index([tenantId])
 }
-
-// ─── Activity & Webhooks ─────────────────────────────────────
 
 model ActivityLog {
   id          String   @id @default(cuid())
@@ -342,7 +308,6 @@ model ActivityLog {
   details     Json?
   createdAt   DateTime @default(now())
 
-  // Relations
   tenant      Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
 
   @@index([tenantId])
@@ -357,7 +322,6 @@ model WebhookEvent {
   processed   Boolean  @default(false)
   createdAt   DateTime @default(now())
 
-  // Relations
   tenant      Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
 
   @@index([tenantId])
