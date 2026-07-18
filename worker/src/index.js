@@ -1,3 +1,4 @@
+import { createServer } from 'http';
 import { Worker } from 'bullmq';
 import { PrismaClient } from '@prisma/client';
 import { PrismaPg } from '@prisma/adapter-pg';
@@ -251,11 +252,29 @@ worker.on('ready', () => {
   console.log('[Worker] BullMQ worker ready, listening for publish-jobs...');
 });
 
+// ─── Health Check Server (keeps Render happy) ────────────────
+
+const PORT = process.env.PORT || 3000;
+const httpServer = createServer((req, res) => {
+  if (req.url === '/health') {
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({ status: 'ok', worker: 'fb-saas-worker' }));
+  } else {
+    res.writeHead(404);
+    res.end();
+  }
+});
+
+httpServer.listen(PORT, () => {
+  console.log(`[Worker] Health check server listening on port ${PORT}`);
+});
+
 // ─── Graceful Shutdown ───────────────────────────────────────
 
 async function shutdown() {
   console.log('[Worker] Shutting down...');
   await worker.close();
+  httpServer.close();
   await prisma.$disconnect();
   process.exit(0);
 }
