@@ -1,0 +1,364 @@
+// Copy of root schema for worker builds
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ─── Core Models ───────────────────────────────────────────────
+
+model Tenant {
+  id            String   @id @default(cuid())
+  name          String
+  slug          String   @unique
+  settings      Json?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  // Relations
+  users         User[]
+  facebookPages FacebookPage[]
+  posts         Post[]
+  comments      Comment[]
+  replyRules    ReplyRule[]
+  analytics     Analytics[]
+  subscriptions Subscription[]
+  mediaAssets   MediaAsset[]
+  publishJobs   PublishJob[]
+  publishAttempts PublishAttempt[]
+  aiCredentials AICredential[]
+  aiSettings    AISettings?
+  brandVoices   BrandVoice[]
+  activityLogs  ActivityLog[]
+  webhookEvents WebhookEvent[]
+}
+
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  passwordHash  String
+  name          String
+  tenantId      String    @default("")
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  // Relations
+  tenant        Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  facebookPage  FacebookPage?
+  posts         Post[]
+  replyRules    ReplyRule[]
+  comments      Comment[]
+
+  @@index([tenantId])
+}
+
+// ─── Facebook Integration ─────────────────────────────────────
+
+model FacebookPage {
+  id              String   @id @default(cuid())
+  userId          String   @unique
+  tenantId        String   @default("")
+  pageId          String   @unique
+  pageName        String
+  accessToken     String
+  webhookToken    String
+  connectedAt     DateTime @default(now())
+  updatedAt       DateTime @default(now()) @updatedAt
+
+  // Relations
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tenant          Tenant?  @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  posts           Post[]
+  comments        Comment[]
+
+  @@index([tenantId])
+}
+
+// ─── Content Models ───────────────────────────────────────────
+
+model Post {
+  id              String   @id @default(cuid())
+  userId          String
+  tenantId        String   @default("")
+  pageId          String
+  content         String
+  mediaUrls       String[]
+  mediaType       String   @default("text")
+  brandVoice      String   @default("professional")
+  status          String   @default("draft")
+  facebookPostId  String?
+  publishedAt     DateTime?
+  errorMessage    String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  // Relations
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tenant          Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  page            FacebookPage @relation(fields: [pageId], references: [id], onDelete: Cascade)
+  publishJob      PublishJob?
+  comments        Comment[]
+  analytics       Analytics[]
+
+  @@index([tenantId])
+  @@index([status])
+  @@index([facebookPostId])
+}
+
+// ─── Queue & Publishing ───────────────────────────────────────
+
+model PublishJob {
+  id           String   @id @default(cuid())
+  postId       String   @unique
+  userId       String
+  tenantId     String
+  status       String   @default("queued")
+  scheduledAt  DateTime
+  timezone     String   @default("UTC")
+  facebookPostId String?
+  attempts     Int      @default(0)
+  maxAttempts  Int      @default(3)
+  errorMessage String?
+  publishedAt  DateTime?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  // Relations
+  post         Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  tenant       Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  attempts_log PublishAttempt[]
+
+  @@index([tenantId])
+  @@index([status])
+  @@index([scheduledAt])
+}
+
+model PublishAttempt {
+  id             String    @id @default(cuid())
+  jobId          String
+  tenantId       String
+  attemptNumber  Int
+  status         String    @default("pending")
+  facebookPostId String?
+  errorMessage   String?
+  startedAt      DateTime?
+  finishedAt     DateTime?
+  createdAt      DateTime  @default(now())
+
+  // Relations
+  job            PublishJob @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  tenant         Tenant     @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([jobId])
+  @@index([tenantId])
+}
+
+// ─── Comments & Rules ────────────────────────────────────────
+
+model Comment {
+  id               String    @id @default(cuid())
+  userId           String
+  tenantId         String
+  pageId           String
+  postId           String?
+  ruleId           String?
+  facebookCommentId String  @unique
+  authorName       String
+  authorId         String
+  content          String
+  status           String    @default("pending")
+  reply            String?
+  repliedAt        DateTime?
+  createdAt        DateTime  @default(now())
+
+  // Relations
+  user             User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tenant           Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  page             FacebookPage @relation(fields: [pageId], references: [id], onDelete: Cascade)
+  post             Post?     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  rule             ReplyRule? @relation(fields: [ruleId], references: [id], onDelete: SetNull)
+
+  @@index([tenantId])
+  @@index([status])
+}
+
+model ReplyRule {
+  id              String   @id @default(cuid())
+  userId          String
+  tenantId        String   @default("")
+  name            String
+  type            String
+  isActive        Boolean  @default(true)
+  priority        Int      @default(0)
+  keywords        String[]
+  sentiment       String?
+  daysOfWeek      String[]
+  startTime       String?
+  endTime         String?
+  replyTemplate   String   @default("")
+  action          String   @default("template")
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  // Relations
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tenant          Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  comments        Comment[]
+
+  @@index([tenantId])
+}
+
+// ─── Analytics ───────────────────────────────────────────────
+
+model Analytics {
+  id           String   @id @default(cuid())
+  postId       String
+  userId       String
+  tenantId     String
+  postType     String   @default("post")
+  likes        Int      @default(0)
+  comments     Int      @default(0)
+  shares       Int      @default(0)
+  reach        Int      @default(0)
+  collectedAt  DateTime @default(now())
+
+  // Relations
+  post         Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  tenant       Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId])
+  @@index([collectedAt])
+}
+
+// ─── Subscriptions ───────────────────────────────────────────
+
+model Subscription {
+  id              String   @id @default(cuid())
+  tenantId        String
+  plan            String   @default("free")
+  status          String   @default("active")
+  postsPerMonth   Int      @default(50)
+  postsUsed       Int      @default(0)
+  maxPages        Int      @default(1)
+  maxTeamMembers  Int      @default(1)
+  expiresAt       DateTime?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  // Relations
+  tenant          Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@unique([tenantId])
+}
+
+// ─── Media Library ───────────────────────────────────────────
+
+model MediaAsset {
+  id              String   @id @default(cuid())
+  userId          String
+  tenantId        String
+  fileName        String
+  fileKey         String
+  fileUrl         String
+  fileType        String
+  fileSize        Int
+  mimeType        String
+  resourceType    String
+  storageProvider String   @default("r2")
+  createdAt       DateTime @default(now())
+
+  // Relations
+  tenant          Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId])
+}
+
+// ─── AI Configuration ────────────────────────────────────────
+
+model AICredential {
+  id          String   @id @default(cuid())
+  tenantId    String
+  provider    String
+  apiKey      String
+  model       String?
+  isDefault   Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  tenant      Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@unique([tenantId, provider])
+}
+
+model AISettings {
+  id              String   @id @default(cuid())
+  tenantId        String
+  defaultProvider String   @default("openrouter")
+  defaultModel    String   @default("google/gemini-2.0-flash:free")
+  temperature     Float    @default(0.7)
+  maxTokens       Int      @default(1024)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  // Relations
+  tenant          Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@unique([tenantId])
+}
+
+// ─── Brand Voices ────────────────────────────────────────────
+
+model BrandVoice {
+  id          String   @id @default(cuid())
+  name        String
+  slug        String   @unique
+  description String
+  tone        String
+  styleGuide  String   @default("")
+  examples    String[]
+  isDefault   Boolean  @default(false)
+  isGlobal    Boolean  @default(false)
+  tenantId    String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  tenant      Tenant?  @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId])
+}
+
+// ─── Activity & Webhooks ─────────────────────────────────────
+
+model ActivityLog {
+  id          String   @id @default(cuid())
+  userId      String
+  tenantId    String
+  action      String
+  details     Json?
+  createdAt   DateTime @default(now())
+
+  // Relations
+  tenant      Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId])
+  @@index([createdAt])
+}
+
+model WebhookEvent {
+  id          String   @id @default(cuid())
+  tenantId    String
+  eventId     String   @unique
+  payload     Json?
+  processed   Boolean  @default(false)
+  createdAt   DateTime @default(now())
+
+  // Relations
+  tenant      Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId])
+}

@@ -1,6 +1,3 @@
-worker/
-worker/node_modules/
-worker/dist/
 node_modules/
 .next/
 .env
