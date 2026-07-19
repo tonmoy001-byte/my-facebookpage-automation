@@ -1,4 +1,5 @@
 # FB AutoPost SaaS
+<!-- trigger rebuild -->
 
 A multi-tenant SaaS application for Facebook Page automation with AI-powered content generation, scheduling, and auto-reply capabilities.
 
