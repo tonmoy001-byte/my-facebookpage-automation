@@ -1,7 +1,7 @@
 // @ts-nocheck
 import { NextResponse } from 'next/server';
 import { getCurrentUser } from '@/lib/auth';
-import { callOpenRouter, getLanguageInstruction, type OpenRouterMessage } from '@/lib/ai/client';
+import { callOpenRouter, imageToBase64DataUri, getLanguageInstruction, type OpenRouterMessage } from '@/lib/ai/client';
 import { checkRateLimit } from '@/lib/rate-limit';
 
 export async function POST(request: Request) {
@@ -35,6 +35,8 @@ export async function POST(request: Request) {
 
     const langInstruction = getLanguageInstruction(language || 'EN');
 
+    const dataUri = await imageToBase64DataUri(imageUrl);
+
     const messages: OpenRouterMessage[] = [
       {
         role: 'system',
@@ -52,7 +54,7 @@ Return your analysis as JSON:
         role: 'user',
         content: [
           { type: 'text', text: 'Analyze this image and return the structured JSON response.' },
-          { type: 'image_url', image_url: { url: imageUrl } },
+          { type: 'image_url', image_url: { url: dataUri } },
         ],
       },
     ];

@@ -97,6 +97,15 @@ export async function resolveBrandVoice(
   };
 }
 
+export async function imageToBase64DataUri(imageUrl: string): Promise<string> {
+  const response = await fetch(imageUrl);
+  if (!response.ok) throw new Error(`Failed to fetch image: ${response.status}`);
+  const contentType = response.headers.get('content-type') || 'image/jpeg';
+  const buffer = Buffer.from(await response.arrayBuffer());
+  const base64 = buffer.toString('base64');
+  return `data:${contentType};base64,${base64}`;
+}
+
 export async function callOpenRouter(
   messages: OpenRouterMessage[],
   options: OpenRouterOptions = {}

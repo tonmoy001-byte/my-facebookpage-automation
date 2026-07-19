@@ -1,5 +1,5 @@
 // @ts-nocheck
-import { callOpenRouter, resolveBrandVoice, getLanguageInstruction, type OpenRouterMessage } from './client';
+import { callOpenRouter, imageToBase64DataUri, resolveBrandVoice, getLanguageInstruction, type OpenRouterMessage } from './client';
 
 export interface GenerateCaptionOptions {
   tenantId?: string;
@@ -61,11 +61,13 @@ ${styleGuide}${examples}`,
   if (imageUrl) {
     userPrompt += `\n\nAnalyze this image and use its content to enhance the caption. The image shows what the post is about.`;
 
+    const dataUri = await imageToBase64DataUri(imageUrl);
+
     messages.push({
       role: 'user',
       content: [
         { type: 'text', text: userPrompt },
-        { type: 'image_url', image_url: { url: imageUrl } },
+        { type: 'image_url', image_url: { url: dataUri } },
       ],
     });
   } else {
