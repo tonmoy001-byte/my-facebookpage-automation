@@ -1,5 +1,5 @@
 // @ts-nocheck
-import { callOpenRouter, imageToBase64DataUri, resolveBrandVoice, getLanguageInstruction, type OpenRouterMessage } from './client';
+import { callGemini, imageToBase64DataUri, resolveBrandVoice, getLanguageInstruction, type OpenRouterMessage } from './client';
 
 export interface GenerateCaptionOptions {
   tenantId?: string;
@@ -93,7 +93,7 @@ Format your response as JSON:
 }${includeHashtags ? '' : '\nSet hashtags to an empty array.'}`,
   });
 
-  const content = await callOpenRouter(messages, { tenantId, maxTokens: 1000 });
+  const content = await callGemini(messages, { tenantId, maxTokens: 1000 });
 
   try {
     const parsed = JSON.parse(content);

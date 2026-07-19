@@ -1,7 +1,7 @@
 // @ts-nocheck
 import { NextResponse } from 'next/server';
 import { getCurrentUser } from '@/lib/auth';
-import { callOpenRouter, imageToBase64DataUri, getLanguageInstruction, type OpenRouterMessage } from '@/lib/ai/client';
+import { callGemini, imageToBase64DataUri, getLanguageInstruction, type OpenRouterMessage } from '@/lib/ai/client';
 import { checkRateLimit } from '@/lib/rate-limit';
 
 export async function POST(request: Request) {
@@ -59,7 +59,7 @@ Return your analysis as JSON:
       },
     ];
 
-    const content = await callOpenRouter(messages, {
+    const content = await callGemini(messages, {
       tenantId: user.tenantId,
       maxTokens: 500,
     });

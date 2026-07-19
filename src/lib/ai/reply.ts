@@ -1,5 +1,5 @@
 // @ts-nocheck
-import { callOpenRouter, resolveBrandVoice, getLanguageInstruction, getModel, type OpenRouterMessage } from './client';
+import { callGemini, resolveBrandVoice, getLanguageInstruction, getModel, type OpenRouterMessage } from './client';
 
 export interface GenerateReplyOptions {
   comment: string;
@@ -90,7 +90,7 @@ Generate a brief, appropriate reply.`,
     },
   ];
 
-  const reply = await callOpenRouter(messages, { tenantId, maxTokens: 200 });
+  const reply = await callGemini(messages, { tenantId, maxTokens: 200 });
   const modelUsed = await getModel(tenantId);
 
   return {

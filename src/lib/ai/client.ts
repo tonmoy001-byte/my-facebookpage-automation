@@ -1,7 +1,7 @@
 // @ts-nocheck
 import { prisma } from '../prisma';
 
-const OPENROUTER_API_URL = 'https://openrouter.ai/api/v1/chat/completions';
+const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/openai/chat/completions';
 
 export interface OpenRouterMessage {
   role: 'system' | 'user' | 'assistant';
@@ -35,12 +35,13 @@ export function getLanguageInstruction(language: string): string {
 export async function getApiKey(tenantId?: string): Promise<string> {
   if (tenantId) {
     const credential = await prisma.aICredential.findFirst({
-      where: { tenantId, provider: 'openrouter' },
+      where: { tenantId, provider: 'google' },
     });
     if (credential?.apiKey) return credential.apiKey;
   }
+  if (process.env.GEMINI_API_KEY) return process.env.GEMINI_API_KEY;
   if (process.env.OPENROUTER_API_KEY) return process.env.OPENROUTER_API_KEY;
-  throw new Error('No AI API key configured. Add your OpenRouter key in Settings > AI.');
+  throw new Error('No AI API key configured. Add your Gemini key in Settings > AI.');
 }
 
 export async function getModel(tenantId?: string): Promise<string> {
@@ -48,7 +49,7 @@ export async function getModel(tenantId?: string): Promise<string> {
     const settings = await prisma.aISettings.findUnique({ where: { tenantId } });
     if (settings?.defaultModel) return settings.defaultModel;
   }
-  return 'google/gemini-2.5-flash';
+  return 'gemini-2.5-flash';
 }
 
 export async function getTemperature(tenantId?: string): Promise<number> {
@@ -106,7 +107,7 @@ export async function imageToBase64DataUri(imageUrl: string): Promise<string> {
   return `data:${contentType};base64,${base64}`;
 }
 
-export async function callOpenRouter(
+export async function callGemini(
   messages: OpenRouterMessage[],
   options: OpenRouterOptions = {}
 ): Promise<string> {
@@ -116,13 +117,11 @@ export async function callOpenRouter(
   const model = await getModel(tenantId);
   const temperature = tempOverride ?? await getTemperature(tenantId);
 
-  const response = await fetch(OPENROUTER_API_URL, {
+  const response = await fetch(GEMINI_API_URL, {
     method: 'POST',
     headers: {
       Authorization: `Bearer ${apiKey}`,
       'Content-Type': 'application/json',
-      'HTTP-Referer': 'https://fb-autopost.com',
-      'X-Title': 'FB Autopost SaaS',
     },
     body: JSON.stringify({
       model,

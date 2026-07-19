@@ -1,5 +1,5 @@
 // @ts-nocheck
-import { callOpenRouter, getLanguageInstruction, type OpenRouterMessage } from './client';
+import { callGemini, getLanguageInstruction, type OpenRouterMessage } from './client';
 
 export interface SuggestHashtagsOptions {
   description: string;
@@ -43,7 +43,7 @@ Return ONLY a JSON array of hashtag strings (without # prefix), like: ["hashtag1
     },
   ];
 
-  const content = await callOpenRouter(messages, { tenantId, maxTokens: 200 });
+  const content = await callGemini(messages, { tenantId, maxTokens: 200 });
 
   try {
     const parsed = JSON.parse(content);
