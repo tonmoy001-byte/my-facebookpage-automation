@@ -95,7 +95,7 @@ export async function POST(request: Request) {
           timezone: timezone || 'UTC',
           status: 'queued',
           attempts: 0,
-          lastError: null,
+          errorMessage: null,
         },
       });
     } else {

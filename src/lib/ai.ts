@@ -56,7 +56,7 @@ async function getModel(tenantId?: string): Promise<string> {
     const settings = await prisma.aISettings.findUnique({ where: { tenantId } });
     if (settings?.defaultModel) return settings.defaultModel;
   }
-  return 'google/gemini-2.0-flash:free';
+  return 'google/gemini-2.5-flash';
 }
 
 // Look up tenant-specific temperature

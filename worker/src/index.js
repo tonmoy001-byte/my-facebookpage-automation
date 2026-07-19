@@ -2,6 +2,7 @@ import { createServer } from 'http';
 import { Worker } from 'bullmq';
 import { PrismaClient } from '@prisma/client';
 import { PrismaPg } from '@prisma/adapter-pg';
+import { decrypt } from './encryption.js';
 
 // ─── Prisma Setup ────────────────────────────────────────────
 
@@ -155,9 +156,10 @@ async function processPublishJob(job) {
       throw new Error('No Facebook page connected for this tenant');
     }
 
-    // Publish to Facebook
+    // Publish to Facebook (decrypt the encrypted access token first)
+    const decryptedToken = decrypt(page.accessToken);
     const facebookPostId = await publishToFacebook(
-      page.accessToken,
+      decryptedToken,
       page.pageId,
       post.content,
       post.mediaUrls
