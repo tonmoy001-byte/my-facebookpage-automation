@@ -18,7 +18,7 @@ export async function GET(request: Request) {
     const where: any = tenantWhere(user.tenantId, { userId: user.id });
     if (status) where.status = status;
 
-    const [posts, total] = await Promise.all([
+    const [posts, total, brandVoices] = await Promise.all([
       prisma.post.findMany({
         where,
         include: {
@@ -29,9 +29,20 @@ export async function GET(request: Request) {
         skip: offset,
       }),
       prisma.post.count({ where }),
+      prisma.brandVoice.findMany({
+        where: tenantWhere(user.tenantId, {}),
+        select: { id: true, name: true },
+      }),
     ]);
 
-    return NextResponse.json({ posts, total, limit, offset });
+    // Map brandVoice cuid → display name
+    const voiceMap = new Map(brandVoices.map((v: any) => [v.id, v.name]));
+    const postsWithVoiceName = posts.map((p: any) => ({
+      ...p,
+      brandVoice: voiceMap.get(p.brandVoice) || p.brandVoice || null,
+    }));
+
+    return NextResponse.json({ posts: postsWithVoiceName, total, limit, offset });
   } catch (error: any) {
     console.error('Get posts error:', error);
     return NextResponse.json(
