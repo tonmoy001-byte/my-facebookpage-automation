@@ -22,7 +22,6 @@ export async function GET(request: Request) {
       prisma.post.findMany({
         where,
         include: {
-          brandVoiceRel: true,
           publishJob: true,
         },
         orderBy: { createdAt: 'desc' },

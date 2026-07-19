@@ -201,6 +201,7 @@ model ReplyRule {
   endTime         String?
   replyTemplate   String   @default("")
   action          String   @default("template") // template, ai_reply, escalate
+  brandVoiceId    String?
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 

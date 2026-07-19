@@ -19,30 +19,31 @@ export async function GET(request: Request) {
 
 export async function POST(request: Request) {
   try {
+    const body = await request.text();
+
     // Verify webhook signature if app secret is configured
     const appSecret = process.env.FACEBOOK_APP_SECRET;
     if (appSecret) {
       const signature = request.headers.get('x-hub-signature-256');
-      const body = await request.text();
 
-      if (signature && !verifyWebhookSignature(body, signature, appSecret)) {
-        console.error('Invalid webhook signature');
+      if (!signature || !verifyWebhookSignature(body, signature, appSecret)) {
+        console.error('Invalid or missing webhook signature');
         return NextResponse.json({ status: 'invalid signature' }, { status: 403 });
       }
     }
 
-    const body = await request.json();
+    const parsed = JSON.parse(body);
 
     // Verify this is a page event
-    if (body.object !== 'page') {
+    if (parsed.object !== 'page') {
       return NextResponse.json({ status: 'not page event' });
     }
 
     // Store webhook event for deduplication
-    const eventId = body.entry?.[0]?.id + '-' + Date.now();
+    const eventId = parsed.entry?.[0]?.id + '-' + Date.now();
 
     // Process each entry
-    for (const entry of body.entry) {
+    for (const entry of parsed.entry) {
       const pageIdFromWebhook = entry.id;
 
       // Find the specific page that received this event
@@ -106,9 +107,28 @@ async function handleNewComment(value: any, page: any) {
     if (shouldReply(rule, message)) {
       matchedRule = rule;
 
-      // Use the rule's reply template
-      if (rule.replyTemplate) {
-        replyText = rule.replyTemplate;
+      // Handle different action types
+      if (rule.action === 'escalate') {
+        // Escalate: store comment but do NOT auto-reply
+        replyText = null;
+      } else if (rule.action === 'ai_reply') {
+        // AI reply: generate using AI with brand voice from rule
+        try {
+          const { generateReply } = await import('@/lib/ai');
+          replyText = await generateReply(message, 'professional');
+        } catch (aiError) {
+          console.error('AI reply generation failed, falling back to template:', aiError);
+          replyText = rule.replyTemplate || null;
+        }
+      } else {
+        // Template reply (default): use replyTemplate with variable substitution
+        replyText = rule.replyTemplate || null;
+      }
+
+      // Replace template variables
+      if (replyText) {
+        replyText = replyText.replace(/{name}/g, from.name || 'there');
+        replyText = replyText.replace(/{comment}/g, message);
       }
       break;
     }
@@ -126,11 +146,11 @@ async function handleNewComment(value: any, page: any) {
       authorName: from.name || 'Unknown',
       authorId: from.id,
       content: message,
-      status: matchedRule ? 'replied' : 'pending',
+      status: matchedRule ? (replyText ? 'replied' : 'pending') : 'pending',
     },
   });
 
-  // Send the auto-reply if a rule matched
+  // Send the auto-reply if a rule matched and we have reply text (not escalated)
   if (matchedRule && replyText) {
     try {
       const fbService = createFacebookService(page.accessToken, page.pageId);
@@ -145,7 +165,7 @@ async function handleNewComment(value: any, page: any) {
         },
       });
 
-      console.log(`Auto-replied to comment ${comment_id} using rule ${matchedRule.name}`);
+      console.log(`Auto-replied to comment ${comment_id} using rule ${matchedRule.name} (action: ${matchedRule.action})`);
     } catch (error) {
       console.error(`Failed to reply to comment ${comment_id}:`, error);
       await prisma.comment.update({
@@ -153,6 +173,8 @@ async function handleNewComment(value: any, page: any) {
         data: { status: 'pending' },
       });
     }
+  } else if (matchedRule && matchedRule.action === 'escalate') {
+    console.log(`Comment ${comment_id} escalated (rule: ${matchedRule.name}), no auto-reply sent`);
   }
 }
 

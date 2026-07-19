@@ -28,7 +28,13 @@ export default function PostsListPage() {
   const [page, setPage] = useState(1);
   const [total, setTotal] = useState(0);
   const limit = 10;
-  const { token } = useAuth();
+  const { token, user, isLoading } = useAuth();
+
+  useEffect(() => {
+    if (!isLoading && !user) {
+      router.push('/login');
+    }
+  }, [user, isLoading, router]);
 
   useEffect(() => {
     fetchPosts();
@@ -172,7 +178,7 @@ export default function PostsListPage() {
                   </div>
                   <div className="flex flex-col gap-2">
                     <Button
-                      onClick={() => router.push(`/posts/${post.id}`)}
+                      onClick={() => router.push(`/posts/create?edit=${post.id}`)}
                       className="bg-gray-200 hover:bg-gray-300 text-gray-800 text-sm"
                     >
                       Edit

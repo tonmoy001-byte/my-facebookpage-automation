@@ -30,7 +30,13 @@ export default function CommentsPage() {
   const [filter, setFilter] = useState<string>('');
   const [page, setPage] = useState(1);
   const [total, setTotal] = useState(0);
-  const { token } = useAuth();
+  const { token, user, isLoading } = useAuth();
+
+  useEffect(() => {
+    if (!isLoading && !user) {
+      window.location.href = '/login';
+    }
+  }, [user, isLoading]);
   const limit = 20;
 
   useEffect(() => {

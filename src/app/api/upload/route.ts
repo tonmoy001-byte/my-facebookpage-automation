@@ -39,9 +39,31 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'No file provided' }, { status: 400 });
     }
 
+    const allowedTypes = [
+      'image/jpeg', 'image/png', 'image/gif', 'image/webp',
+      'video/mp4', 'video/quicktime', 'video/webm',
+    ];
+    if (!allowedTypes.includes(file.type)) {
+      return NextResponse.json(
+        { error: 'Invalid file type. Allowed: JPEG, PNG, GIF, WebP, MP4, QuickTime, WebM' },
+        { status: 400 }
+      );
+    }
+
+    const MAX_IMAGE_SIZE = 10 * 1024 * 1024; // 10MB
+    const MAX_VIDEO_SIZE = 100 * 1024 * 1024; // 100MB
+    const isVideo = file.type.startsWith('video/');
+    const maxSize = isVideo ? MAX_VIDEO_SIZE : MAX_IMAGE_SIZE;
+
+    if (file.size > maxSize) {
+      return NextResponse.json(
+        { error: `File too large. Max size: ${isVideo ? '100MB' : '10MB'}` },
+        { status: 400 }
+      );
+    }
+
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
-    const isVideo = file.type.startsWith('video/');
     const resourceType = isVideo ? 'video' : 'image';
 
     let url: string;

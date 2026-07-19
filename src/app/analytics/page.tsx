@@ -68,7 +68,13 @@ export default function AnalyticsPage() {
   const [dateRange, setDateRange] = useState('30');
   const [customStartDate, setCustomStartDate] = useState('');
   const [customEndDate, setCustomEndDate] = useState('');
-  const { token } = useAuth();
+  const { token, user, isLoading } = useAuth();
+
+  useEffect(() => {
+    if (!isLoading && !user) {
+      window.location.href = '/login';
+    }
+  }, [user, isLoading]);
 
   useEffect(() => {
     fetchData();

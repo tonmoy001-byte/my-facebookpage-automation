@@ -1,8 +1,18 @@
 import { NextResponse } from 'next/server';
 import { createUser } from '@/lib/auth';
+import { checkRateLimit } from '@/lib/rate-limit';
 
 export async function POST(request: Request) {
   try {
+    const ip = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || 'unknown';
+
+    if (!checkRateLimit(`register:${ip}`, 5, 60_000)) {
+      return NextResponse.json(
+        { error: 'Too many registration attempts. Please try again later.' },
+        { status: 429 }
+      );
+    }
+
     const { email, password, name } = await request.json();
 
     if (!email || !password || !name) {

@@ -35,7 +35,13 @@ export default function SchedulePage() {
   const [scheduledPosts, setScheduledPosts] = useState<ScheduledPost[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedPost, setSelectedPost] = useState<ScheduledPost | null>(null);
-  const { token } = useAuth();
+  const { token, user, isLoading } = useAuth();
+
+  useEffect(() => {
+    if (!isLoading && !user) {
+      router.push('/login');
+    }
+  }, [user, isLoading, router]);
 
   useEffect(() => {
     fetchScheduledPosts();

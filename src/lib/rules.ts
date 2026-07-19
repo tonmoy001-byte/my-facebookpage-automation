@@ -120,7 +120,7 @@ export async function generateRuleReply(
   }
   let reply = rule.replyTemplate || '';
   reply = reply.replace(/{comment}/g, comment);
-  reply = reply.replace(/{name}/g, '{name}');
+  // Note: {name} is replaced by the caller with the actual commenter name
   return reply;
 }
 
@@ -136,11 +136,7 @@ export async function processComment(comment: Comment): Promise<string | null> {
 
   const bestMatch = matches[0];
 
-  let brandVoice = 'professional';
-  if (bestMatch.rule.brandVoiceId) {
-    const bv = await prisma.brandVoice.findUnique({ where: { id: bestMatch.rule.brandVoiceId } });
-    if (bv) brandVoice = bv.tone;
-  }
+  const brandVoice = 'professional';
 
   const reply = await generateRuleReply(bestMatch.rule, comment.content, brandVoice);
 

@@ -19,7 +19,6 @@ export async function GET(
     const post = await prisma.post.findFirst({
       where: tenantWhere(user.tenantId, { id, userId: user.id }),
       include: {
-        brandVoiceRel: true,
         publishJob: true,
       },
     });
@@ -83,7 +82,7 @@ export async function PUT(
 
         await prisma.publishJob.update({
           where: { id: existingJob.id },
-          data: { scheduledAt: scheduledDate, timezone: timezone || 'UTC', status: 'queued', attempts: 0, lastError: null },
+          data: { scheduledAt: scheduledDate, timezone: timezone || 'UTC', status: 'queued', attempts: 0, errorMessage: null },
         });
 
         try { await schedulePublishJob(existingJob.id, scheduledDate); } catch (e) { console.warn('Redis not available:', e); }

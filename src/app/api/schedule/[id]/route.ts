@@ -108,7 +108,7 @@ export async function PATCH(
         timezone: timezone || job.timezone,
         status: 'queued',
         attempts: 0,
-        lastError: null,
+        errorMessage: null,
       },
     });
 

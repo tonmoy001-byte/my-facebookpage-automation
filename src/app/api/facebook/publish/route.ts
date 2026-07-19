@@ -2,6 +2,7 @@
 import { NextResponse } from 'next/server';
 import { getCurrentUser } from '@/lib/auth';
 import { prisma, tenantWhere, tenantData } from '@/lib/prisma';
+import { createFacebookService } from '@/lib/facebook';
 
 /**
  * POST /api/facebook/publish
@@ -33,52 +34,19 @@ export async function POST(request: Request) {
       );
     }
 
-    // Build Facebook Graph API request
+    // Use FacebookService which decrypts the access token internally
+    const fbService = createFacebookService(page.accessToken, page.pageId);
+
     let facebookPostId: string;
 
     if (imageUrl && imageUrl.trim()) {
-      // Post with image
-      const response = await fetch(
-        `https://graph.facebook.com/v21.0/${page.pageId}/photos`,
-        {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            url: imageUrl.trim(),
-            caption: message.trim(),
-            access_token: page.accessToken,
-          }),
-        }
-      );
-      const data = await response.json();
-      if (data.error) {
-        return NextResponse.json(
-          { error: `Facebook API error: ${data.error.message}` },
-          { status: 400 }
-        );
-      }
-      facebookPostId = data.id;
+      // Post with image — FacebookService handles decryption
+      const result = await fbService.postPhoto(imageUrl.trim(), message.trim());
+      facebookPostId = result.id;
     } else {
-      // Text-only post
-      const response = await fetch(
-        `https://graph.facebook.com/v21.0/${page.pageId}/feed`,
-        {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            message: message.trim(),
-            access_token: page.accessToken,
-          }),
-        }
-      );
-      const data = await response.json();
-      if (data.error) {
-        return NextResponse.json(
-          { error: `Facebook API error: ${data.error.message}` },
-          { status: 400 }
-        );
-      }
-      facebookPostId = data.id;
+      // Text-only post — FacebookService handles decryption
+      const result = await fbService.postToFeed(message.trim());
+      facebookPostId = result.id;
     }
 
     // Save to DB

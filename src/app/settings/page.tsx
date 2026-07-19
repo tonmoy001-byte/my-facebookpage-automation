@@ -10,7 +10,7 @@ import Button from '@/components/ui/Button';
 import { useToast } from '@/components/Toast';
 
 export default function SettingsPage() {
-  const { user, loading, token } = useAuth();
+  const { user, isLoading: loading, token } = useAuth();
   const router = useRouter();
   const { addToast } = useToast();
   const [activeTab, setActiveTab] = useState('account');

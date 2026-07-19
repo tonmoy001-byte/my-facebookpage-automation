@@ -37,7 +37,13 @@ export default function RulesPage() {
     replyTemplate: '',
     action: 'template' as 'template' | 'ai_reply' | 'escalate',
   });
-  const { token } = useAuth();
+  const { token, user, isLoading } = useAuth();
+
+  useEffect(() => {
+    if (!isLoading && !user) {
+      window.location.href = '/login';
+    }
+  }, [user, isLoading]);
 
   useEffect(() => {
     fetchRules();
