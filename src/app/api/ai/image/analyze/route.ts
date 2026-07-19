@@ -36,6 +36,7 @@ export async function POST(request: Request) {
     const langInstruction = getLanguageInstruction(language || 'EN');
 
     const dataUri = await imageToBase64DataUri(imageUrl);
+    console.log('[ImageAnalyze] Fetched image, dataUri length:', dataUri.length, 'starts with:', dataUri.substring(0, 40));
 
     const messages: OpenRouterMessage[] = [
       {
@@ -63,6 +64,7 @@ Return your analysis as JSON:
       tenantId: user.tenantId,
       maxTokens: 500,
     });
+    console.log('[ImageAnalyze] Gemini response:', content.substring(0, 200));
 
     try {
       const parsed = JSON.parse(content);
@@ -88,7 +90,7 @@ Return your analysis as JSON:
       });
     }
   } catch (error: any) {
-    console.error('Image analysis error:', error);
+    console.error('[ImageAnalyze] ERROR:', error.message, error.stack);
     return NextResponse.json(
       { success: false, error: { code: 'AI_ERROR', message: error.message || 'Failed to analyze image' } },
       { status: 500 }

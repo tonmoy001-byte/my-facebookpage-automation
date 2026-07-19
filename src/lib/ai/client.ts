@@ -47,7 +47,16 @@ export async function getApiKey(tenantId?: string): Promise<string> {
 export async function getModel(tenantId?: string): Promise<string> {
   if (tenantId) {
     const settings = await prisma.aISettings.findUnique({ where: { tenantId } });
-    if (settings?.defaultModel) return settings.defaultModel;
+    if (settings?.defaultModel) {
+      // Detect OpenRouter model IDs (e.g. "google/gemini-2.0-flash:free") and fix them
+      const model = settings.defaultModel;
+      if (model.includes('/') || model.includes(':free')) {
+        // Strip prefix and suffix — direct Gemini uses just the model name
+        const cleaned = model.replace(/^[^/]+\//, '').replace(/:free$/, '');
+        return cleaned || 'gemini-2.5-flash';
+      }
+      return model;
+    }
   }
   return 'gemini-2.5-flash';
 }
@@ -100,11 +109,13 @@ export async function resolveBrandVoice(
 
 export async function imageToBase64DataUri(imageUrl: string): Promise<string> {
   const response = await fetch(imageUrl);
-  if (!response.ok) throw new Error(`Failed to fetch image: ${response.status}`);
+  if (!response.ok) throw new Error(`Failed to fetch image from URL: ${response.status} ${response.statusText} — ${imageUrl}`);
   const contentType = response.headers.get('content-type') || 'image/jpeg';
+  // Strip any extra parameters from content-type (e.g. "image/jpeg; charset=utf-8" → "image/jpeg")
+  const mimeType = contentType.split(';')[0].trim();
   const buffer = Buffer.from(await response.arrayBuffer());
   const base64 = buffer.toString('base64');
-  return `data:${contentType};base64,${base64}`;
+  return `data:${mimeType};base64,${base64}`;
 }
 
 export async function callGemini(
@@ -137,5 +148,11 @@ export async function callGemini(
   }
 
   const data = await response.json();
-  return data.choices[0].message.content;
+  console.log('[AI] Gemini response:', JSON.stringify(data).substring(0, 300));
+  
+  if (!data.choices || !data.choices[0] || !data.choices[0].message) {
+    throw new Error(`Unexpected Gemini response: ${JSON.stringify(data).substring(0, 500)}`);
+  }
+  
+  return data.choices[0].message.content || '';
 }
