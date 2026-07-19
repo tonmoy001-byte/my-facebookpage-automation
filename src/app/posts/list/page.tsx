@@ -13,6 +13,8 @@ interface Post {
   mediaUrls: string[];
   status: string;
   brandVoice?: string;
+  language?: string;
+  autoReply?: boolean;
   createdAt: string;
   publishJob?: {
     scheduledAt: string;
@@ -168,6 +170,16 @@ export default function PostsListPage() {
                       >
                         {post.status}
                       </span>
+                      {post.language && post.language !== 'EN' && (
+                        <span className="px-2 py-1 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800">
+                          {post.language === 'BN' ? 'বাংলা' : post.language}
+                        </span>
+                      )}
+                      {post.autoReply && (
+                        <span className="px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                          Auto-reply
+                        </span>
+                      )}
                       {post.brandVoice && (
                         <span className="text-xs text-gray-500">
                           {post.brandVoice}

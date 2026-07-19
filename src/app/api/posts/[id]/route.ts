@@ -48,7 +48,7 @@ export async function PUT(
     }
 
     const { id } = await params;
-    const { caption, hashtags, imageUrl, mediaUrls, brandVoiceId, status, scheduledAt, timezone } =
+    const { caption, hashtags, imageUrl, mediaUrls, brandVoiceId, status, scheduledAt, timezone, autoReply, language } =
       await request.json();
 
     const post = await prisma.post.findFirst({
@@ -68,6 +68,8 @@ export async function PUT(
         mediaUrls: finalMediaUrls,
         brandVoice: brandVoiceId || post.brandVoice,
         status: status || post.status,
+        ...(autoReply !== undefined && { autoReply }),
+        ...(language && { language }),
       },
     });
 

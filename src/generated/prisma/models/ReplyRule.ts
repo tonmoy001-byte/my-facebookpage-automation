@@ -47,6 +47,7 @@ export type ReplyRuleMinAggregateOutputType = {
   endTime: string | null
   replyTemplate: string | null
   action: string | null
+  brandVoiceId: string | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -64,6 +65,7 @@ export type ReplyRuleMaxAggregateOutputType = {
   endTime: string | null
   replyTemplate: string | null
   action: string | null
+  brandVoiceId: string | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -83,6 +85,7 @@ export type ReplyRuleCountAggregateOutputType = {
   endTime: number
   replyTemplate: number
   action: number
+  brandVoiceId: number
   createdAt: number
   updatedAt: number
   _all: number
@@ -110,6 +113,7 @@ export type ReplyRuleMinAggregateInputType = {
   endTime?: true
   replyTemplate?: true
   action?: true
+  brandVoiceId?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -127,6 +131,7 @@ export type ReplyRuleMaxAggregateInputType = {
   endTime?: true
   replyTemplate?: true
   action?: true
+  brandVoiceId?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -146,6 +151,7 @@ export type ReplyRuleCountAggregateInputType = {
   endTime?: true
   replyTemplate?: true
   action?: true
+  brandVoiceId?: true
   createdAt?: true
   updatedAt?: true
   _all?: true
@@ -252,6 +258,7 @@ export type ReplyRuleGroupByOutputType = {
   endTime: string | null
   replyTemplate: string
   action: string
+  brandVoiceId: string | null
   createdAt: Date
   updatedAt: Date
   _count: ReplyRuleCountAggregateOutputType | null
@@ -294,6 +301,7 @@ export type ReplyRuleWhereInput = {
   endTime?: Prisma.StringNullableFilter<"ReplyRule"> | string | null
   replyTemplate?: Prisma.StringFilter<"ReplyRule"> | string
   action?: Prisma.StringFilter<"ReplyRule"> | string
+  brandVoiceId?: Prisma.StringNullableFilter<"ReplyRule"> | string | null
   createdAt?: Prisma.DateTimeFilter<"ReplyRule"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"ReplyRule"> | Date | string
   user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
@@ -316,6 +324,7 @@ export type ReplyRuleOrderByWithRelationInput = {
   endTime?: Prisma.SortOrderInput | Prisma.SortOrder
   replyTemplate?: Prisma.SortOrder
   action?: Prisma.SortOrder
+  brandVoiceId?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   user?: Prisma.UserOrderByWithRelationInput
@@ -341,6 +350,7 @@ export type ReplyRuleWhereUniqueInput = Prisma.AtLeast<{
   endTime?: Prisma.StringNullableFilter<"ReplyRule"> | string | null
   replyTemplate?: Prisma.StringFilter<"ReplyRule"> | string
   action?: Prisma.StringFilter<"ReplyRule"> | string
+  brandVoiceId?: Prisma.StringNullableFilter<"ReplyRule"> | string | null
   createdAt?: Prisma.DateTimeFilter<"ReplyRule"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"ReplyRule"> | Date | string
   user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
@@ -363,6 +373,7 @@ export type ReplyRuleOrderByWithAggregationInput = {
   endTime?: Prisma.SortOrderInput | Prisma.SortOrder
   replyTemplate?: Prisma.SortOrder
   action?: Prisma.SortOrder
+  brandVoiceId?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   _count?: Prisma.ReplyRuleCountOrderByAggregateInput
@@ -390,6 +401,7 @@ export type ReplyRuleScalarWhereWithAggregatesInput = {
   endTime?: Prisma.StringNullableWithAggregatesFilter<"ReplyRule"> | string | null
   replyTemplate?: Prisma.StringWithAggregatesFilter<"ReplyRule"> | string
   action?: Prisma.StringWithAggregatesFilter<"ReplyRule"> | string
+  brandVoiceId?: Prisma.StringNullableWithAggregatesFilter<"ReplyRule"> | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"ReplyRule"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"ReplyRule"> | Date | string
 }
@@ -407,6 +419,7 @@ export type ReplyRuleCreateInput = {
   endTime?: string | null
   replyTemplate?: string
   action?: string
+  brandVoiceId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   user: Prisma.UserCreateNestedOneWithoutReplyRulesInput
@@ -429,6 +442,7 @@ export type ReplyRuleUncheckedCreateInput = {
   endTime?: string | null
   replyTemplate?: string
   action?: string
+  brandVoiceId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   comments?: Prisma.CommentUncheckedCreateNestedManyWithoutRuleInput
@@ -447,6 +461,7 @@ export type ReplyRuleUpdateInput = {
   endTime?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   replyTemplate?: Prisma.StringFieldUpdateOperationsInput | string
   action?: Prisma.StringFieldUpdateOperationsInput | string
+  brandVoiceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   user?: Prisma.UserUpdateOneRequiredWithoutReplyRulesNestedInput
@@ -469,6 +484,7 @@ export type ReplyRuleUncheckedUpdateInput = {
   endTime?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   replyTemplate?: Prisma.StringFieldUpdateOperationsInput | string
   action?: Prisma.StringFieldUpdateOperationsInput | string
+  brandVoiceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   comments?: Prisma.CommentUncheckedUpdateManyWithoutRuleNestedInput
@@ -489,6 +505,7 @@ export type ReplyRuleCreateManyInput = {
   endTime?: string | null
   replyTemplate?: string
   action?: string
+  brandVoiceId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -506,6 +523,7 @@ export type ReplyRuleUpdateManyMutationInput = {
   endTime?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   replyTemplate?: Prisma.StringFieldUpdateOperationsInput | string
   action?: Prisma.StringFieldUpdateOperationsInput | string
+  brandVoiceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -525,6 +543,7 @@ export type ReplyRuleUncheckedUpdateManyInput = {
   endTime?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   replyTemplate?: Prisma.StringFieldUpdateOperationsInput | string
   action?: Prisma.StringFieldUpdateOperationsInput | string
+  brandVoiceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -559,6 +578,7 @@ export type ReplyRuleCountOrderByAggregateInput = {
   endTime?: Prisma.SortOrder
   replyTemplate?: Prisma.SortOrder
   action?: Prisma.SortOrder
+  brandVoiceId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -580,6 +600,7 @@ export type ReplyRuleMaxOrderByAggregateInput = {
   endTime?: Prisma.SortOrder
   replyTemplate?: Prisma.SortOrder
   action?: Prisma.SortOrder
+  brandVoiceId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -597,6 +618,7 @@ export type ReplyRuleMinOrderByAggregateInput = {
   endTime?: Prisma.SortOrder
   replyTemplate?: Prisma.SortOrder
   action?: Prisma.SortOrder
+  brandVoiceId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -713,10 +735,6 @@ export type ReplyRuleCreatedaysOfWeekInput = {
   set: string[]
 }
 
-export type BoolFieldUpdateOperationsInput = {
-  set?: boolean
-}
-
 export type ReplyRuleUpdatekeywordsInput = {
   set?: string[]
   push?: string | string[]
@@ -740,6 +758,7 @@ export type ReplyRuleCreateWithoutTenantInput = {
   endTime?: string | null
   replyTemplate?: string
   action?: string
+  brandVoiceId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   user: Prisma.UserCreateNestedOneWithoutReplyRulesInput
@@ -760,6 +779,7 @@ export type ReplyRuleUncheckedCreateWithoutTenantInput = {
   endTime?: string | null
   replyTemplate?: string
   action?: string
+  brandVoiceId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   comments?: Prisma.CommentUncheckedCreateNestedManyWithoutRuleInput
@@ -809,6 +829,7 @@ export type ReplyRuleScalarWhereInput = {
   endTime?: Prisma.StringNullableFilter<"ReplyRule"> | string | null
   replyTemplate?: Prisma.StringFilter<"ReplyRule"> | string
   action?: Prisma.StringFilter<"ReplyRule"> | string
+  brandVoiceId?: Prisma.StringNullableFilter<"ReplyRule"> | string | null
   createdAt?: Prisma.DateTimeFilter<"ReplyRule"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"ReplyRule"> | Date | string
 }
@@ -826,6 +847,7 @@ export type ReplyRuleCreateWithoutUserInput = {
   endTime?: string | null
   replyTemplate?: string
   action?: string
+  brandVoiceId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   tenant?: Prisma.TenantCreateNestedOneWithoutReplyRulesInput
@@ -846,6 +868,7 @@ export type ReplyRuleUncheckedCreateWithoutUserInput = {
   endTime?: string | null
   replyTemplate?: string
   action?: string
+  brandVoiceId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   comments?: Prisma.CommentUncheckedCreateNestedManyWithoutRuleInput
@@ -890,6 +913,7 @@ export type ReplyRuleCreateWithoutCommentsInput = {
   endTime?: string | null
   replyTemplate?: string
   action?: string
+  brandVoiceId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   user: Prisma.UserCreateNestedOneWithoutReplyRulesInput
@@ -911,6 +935,7 @@ export type ReplyRuleUncheckedCreateWithoutCommentsInput = {
   endTime?: string | null
   replyTemplate?: string
   action?: string
+  brandVoiceId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -944,6 +969,7 @@ export type ReplyRuleUpdateWithoutCommentsInput = {
   endTime?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   replyTemplate?: Prisma.StringFieldUpdateOperationsInput | string
   action?: Prisma.StringFieldUpdateOperationsInput | string
+  brandVoiceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   user?: Prisma.UserUpdateOneRequiredWithoutReplyRulesNestedInput
@@ -965,6 +991,7 @@ export type ReplyRuleUncheckedUpdateWithoutCommentsInput = {
   endTime?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   replyTemplate?: Prisma.StringFieldUpdateOperationsInput | string
   action?: Prisma.StringFieldUpdateOperationsInput | string
+  brandVoiceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -983,6 +1010,7 @@ export type ReplyRuleCreateManyTenantInput = {
   endTime?: string | null
   replyTemplate?: string
   action?: string
+  brandVoiceId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -1000,6 +1028,7 @@ export type ReplyRuleUpdateWithoutTenantInput = {
   endTime?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   replyTemplate?: Prisma.StringFieldUpdateOperationsInput | string
   action?: Prisma.StringFieldUpdateOperationsInput | string
+  brandVoiceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   user?: Prisma.UserUpdateOneRequiredWithoutReplyRulesNestedInput
@@ -1020,6 +1049,7 @@ export type ReplyRuleUncheckedUpdateWithoutTenantInput = {
   endTime?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   replyTemplate?: Prisma.StringFieldUpdateOperationsInput | string
   action?: Prisma.StringFieldUpdateOperationsInput | string
+  brandVoiceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   comments?: Prisma.CommentUncheckedUpdateManyWithoutRuleNestedInput
@@ -1039,6 +1069,7 @@ export type ReplyRuleUncheckedUpdateManyWithoutTenantInput = {
   endTime?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   replyTemplate?: Prisma.StringFieldUpdateOperationsInput | string
   action?: Prisma.StringFieldUpdateOperationsInput | string
+  brandVoiceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -1057,6 +1088,7 @@ export type ReplyRuleCreateManyUserInput = {
   endTime?: string | null
   replyTemplate?: string
   action?: string
+  brandVoiceId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -1074,6 +1106,7 @@ export type ReplyRuleUpdateWithoutUserInput = {
   endTime?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   replyTemplate?: Prisma.StringFieldUpdateOperationsInput | string
   action?: Prisma.StringFieldUpdateOperationsInput | string
+  brandVoiceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   tenant?: Prisma.TenantUpdateOneRequiredWithoutReplyRulesNestedInput
@@ -1094,6 +1127,7 @@ export type ReplyRuleUncheckedUpdateWithoutUserInput = {
   endTime?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   replyTemplate?: Prisma.StringFieldUpdateOperationsInput | string
   action?: Prisma.StringFieldUpdateOperationsInput | string
+  brandVoiceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   comments?: Prisma.CommentUncheckedUpdateManyWithoutRuleNestedInput
@@ -1113,6 +1147,7 @@ export type ReplyRuleUncheckedUpdateManyWithoutUserInput = {
   endTime?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   replyTemplate?: Prisma.StringFieldUpdateOperationsInput | string
   action?: Prisma.StringFieldUpdateOperationsInput | string
+  brandVoiceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -1163,6 +1198,7 @@ export type ReplyRuleSelect<ExtArgs extends runtime.Types.Extensions.InternalArg
   endTime?: boolean
   replyTemplate?: boolean
   action?: boolean
+  brandVoiceId?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
@@ -1186,6 +1222,7 @@ export type ReplyRuleSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Ext
   endTime?: boolean
   replyTemplate?: boolean
   action?: boolean
+  brandVoiceId?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
@@ -1207,6 +1244,7 @@ export type ReplyRuleSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Ext
   endTime?: boolean
   replyTemplate?: boolean
   action?: boolean
+  brandVoiceId?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
@@ -1228,11 +1266,12 @@ export type ReplyRuleSelectScalar = {
   endTime?: boolean
   replyTemplate?: boolean
   action?: boolean
+  brandVoiceId?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type ReplyRuleOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "tenantId" | "name" | "type" | "isActive" | "priority" | "keywords" | "sentiment" | "daysOfWeek" | "startTime" | "endTime" | "replyTemplate" | "action" | "createdAt" | "updatedAt", ExtArgs["result"]["replyRule"]>
+export type ReplyRuleOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "tenantId" | "name" | "type" | "isActive" | "priority" | "keywords" | "sentiment" | "daysOfWeek" | "startTime" | "endTime" | "replyTemplate" | "action" | "brandVoiceId" | "createdAt" | "updatedAt", ExtArgs["result"]["replyRule"]>
 export type ReplyRuleInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   tenant?: boolean | Prisma.TenantDefaultArgs<ExtArgs>
@@ -1270,6 +1309,7 @@ export type $ReplyRulePayload<ExtArgs extends runtime.Types.Extensions.InternalA
     endTime: string | null
     replyTemplate: string
     action: string
+    brandVoiceId: string | null
     createdAt: Date
     updatedAt: Date
   }, ExtArgs["result"]["replyRule"]>
@@ -1712,6 +1752,7 @@ export interface ReplyRuleFieldRefs {
   readonly endTime: Prisma.FieldRef<"ReplyRule", 'String'>
   readonly replyTemplate: Prisma.FieldRef<"ReplyRule", 'String'>
   readonly action: Prisma.FieldRef<"ReplyRule", 'String'>
+  readonly brandVoiceId: Prisma.FieldRef<"ReplyRule", 'String'>
   readonly createdAt: Prisma.FieldRef<"ReplyRule", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"ReplyRule", 'DateTime'>
 }

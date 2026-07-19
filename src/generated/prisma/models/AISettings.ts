@@ -43,6 +43,8 @@ export type AISettingsMinAggregateOutputType = {
   defaultModel: string | null
   temperature: number | null
   maxTokens: number | null
+  defaultLanguage: $Enums.Language | null
+  defaultBrandVoiceId: string | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -54,6 +56,8 @@ export type AISettingsMaxAggregateOutputType = {
   defaultModel: string | null
   temperature: number | null
   maxTokens: number | null
+  defaultLanguage: $Enums.Language | null
+  defaultBrandVoiceId: string | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -65,6 +69,8 @@ export type AISettingsCountAggregateOutputType = {
   defaultModel: number
   temperature: number
   maxTokens: number
+  defaultLanguage: number
+  defaultBrandVoiceId: number
   createdAt: number
   updatedAt: number
   _all: number
@@ -88,6 +94,8 @@ export type AISettingsMinAggregateInputType = {
   defaultModel?: true
   temperature?: true
   maxTokens?: true
+  defaultLanguage?: true
+  defaultBrandVoiceId?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -99,6 +107,8 @@ export type AISettingsMaxAggregateInputType = {
   defaultModel?: true
   temperature?: true
   maxTokens?: true
+  defaultLanguage?: true
+  defaultBrandVoiceId?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -110,6 +120,8 @@ export type AISettingsCountAggregateInputType = {
   defaultModel?: true
   temperature?: true
   maxTokens?: true
+  defaultLanguage?: true
+  defaultBrandVoiceId?: true
   createdAt?: true
   updatedAt?: true
   _all?: true
@@ -208,6 +220,8 @@ export type AISettingsGroupByOutputType = {
   defaultModel: string
   temperature: number
   maxTokens: number
+  defaultLanguage: $Enums.Language
+  defaultBrandVoiceId: string | null
   createdAt: Date
   updatedAt: Date
   _count: AISettingsCountAggregateOutputType | null
@@ -242,6 +256,8 @@ export type AISettingsWhereInput = {
   defaultModel?: Prisma.StringFilter<"AISettings"> | string
   temperature?: Prisma.FloatFilter<"AISettings"> | number
   maxTokens?: Prisma.IntFilter<"AISettings"> | number
+  defaultLanguage?: Prisma.EnumLanguageFilter<"AISettings"> | $Enums.Language
+  defaultBrandVoiceId?: Prisma.StringNullableFilter<"AISettings"> | string | null
   createdAt?: Prisma.DateTimeFilter<"AISettings"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"AISettings"> | Date | string
   tenant?: Prisma.XOR<Prisma.TenantScalarRelationFilter, Prisma.TenantWhereInput>
@@ -254,6 +270,8 @@ export type AISettingsOrderByWithRelationInput = {
   defaultModel?: Prisma.SortOrder
   temperature?: Prisma.SortOrder
   maxTokens?: Prisma.SortOrder
+  defaultLanguage?: Prisma.SortOrder
+  defaultBrandVoiceId?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   tenant?: Prisma.TenantOrderByWithRelationInput
@@ -269,6 +287,8 @@ export type AISettingsWhereUniqueInput = Prisma.AtLeast<{
   defaultModel?: Prisma.StringFilter<"AISettings"> | string
   temperature?: Prisma.FloatFilter<"AISettings"> | number
   maxTokens?: Prisma.IntFilter<"AISettings"> | number
+  defaultLanguage?: Prisma.EnumLanguageFilter<"AISettings"> | $Enums.Language
+  defaultBrandVoiceId?: Prisma.StringNullableFilter<"AISettings"> | string | null
   createdAt?: Prisma.DateTimeFilter<"AISettings"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"AISettings"> | Date | string
   tenant?: Prisma.XOR<Prisma.TenantScalarRelationFilter, Prisma.TenantWhereInput>
@@ -281,6 +301,8 @@ export type AISettingsOrderByWithAggregationInput = {
   defaultModel?: Prisma.SortOrder
   temperature?: Prisma.SortOrder
   maxTokens?: Prisma.SortOrder
+  defaultLanguage?: Prisma.SortOrder
+  defaultBrandVoiceId?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   _count?: Prisma.AISettingsCountOrderByAggregateInput
@@ -300,6 +322,8 @@ export type AISettingsScalarWhereWithAggregatesInput = {
   defaultModel?: Prisma.StringWithAggregatesFilter<"AISettings"> | string
   temperature?: Prisma.FloatWithAggregatesFilter<"AISettings"> | number
   maxTokens?: Prisma.IntWithAggregatesFilter<"AISettings"> | number
+  defaultLanguage?: Prisma.EnumLanguageWithAggregatesFilter<"AISettings"> | $Enums.Language
+  defaultBrandVoiceId?: Prisma.StringNullableWithAggregatesFilter<"AISettings"> | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"AISettings"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"AISettings"> | Date | string
 }
@@ -310,6 +334,8 @@ export type AISettingsCreateInput = {
   defaultModel?: string
   temperature?: number
   maxTokens?: number
+  defaultLanguage?: $Enums.Language
+  defaultBrandVoiceId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   tenant: Prisma.TenantCreateNestedOneWithoutAiSettingsInput
@@ -322,6 +348,8 @@ export type AISettingsUncheckedCreateInput = {
   defaultModel?: string
   temperature?: number
   maxTokens?: number
+  defaultLanguage?: $Enums.Language
+  defaultBrandVoiceId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -332,6 +360,8 @@ export type AISettingsUpdateInput = {
   defaultModel?: Prisma.StringFieldUpdateOperationsInput | string
   temperature?: Prisma.FloatFieldUpdateOperationsInput | number
   maxTokens?: Prisma.IntFieldUpdateOperationsInput | number
+  defaultLanguage?: Prisma.EnumLanguageFieldUpdateOperationsInput | $Enums.Language
+  defaultBrandVoiceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   tenant?: Prisma.TenantUpdateOneRequiredWithoutAiSettingsNestedInput
@@ -344,6 +374,8 @@ export type AISettingsUncheckedUpdateInput = {
   defaultModel?: Prisma.StringFieldUpdateOperationsInput | string
   temperature?: Prisma.FloatFieldUpdateOperationsInput | number
   maxTokens?: Prisma.IntFieldUpdateOperationsInput | number
+  defaultLanguage?: Prisma.EnumLanguageFieldUpdateOperationsInput | $Enums.Language
+  defaultBrandVoiceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -355,6 +387,8 @@ export type AISettingsCreateManyInput = {
   defaultModel?: string
   temperature?: number
   maxTokens?: number
+  defaultLanguage?: $Enums.Language
+  defaultBrandVoiceId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -365,6 +399,8 @@ export type AISettingsUpdateManyMutationInput = {
   defaultModel?: Prisma.StringFieldUpdateOperationsInput | string
   temperature?: Prisma.FloatFieldUpdateOperationsInput | number
   maxTokens?: Prisma.IntFieldUpdateOperationsInput | number
+  defaultLanguage?: Prisma.EnumLanguageFieldUpdateOperationsInput | $Enums.Language
+  defaultBrandVoiceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -376,6 +412,8 @@ export type AISettingsUncheckedUpdateManyInput = {
   defaultModel?: Prisma.StringFieldUpdateOperationsInput | string
   temperature?: Prisma.FloatFieldUpdateOperationsInput | number
   maxTokens?: Prisma.IntFieldUpdateOperationsInput | number
+  defaultLanguage?: Prisma.EnumLanguageFieldUpdateOperationsInput | $Enums.Language
+  defaultBrandVoiceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -392,6 +430,8 @@ export type AISettingsCountOrderByAggregateInput = {
   defaultModel?: Prisma.SortOrder
   temperature?: Prisma.SortOrder
   maxTokens?: Prisma.SortOrder
+  defaultLanguage?: Prisma.SortOrder
+  defaultBrandVoiceId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -408,6 +448,8 @@ export type AISettingsMaxOrderByAggregateInput = {
   defaultModel?: Prisma.SortOrder
   temperature?: Prisma.SortOrder
   maxTokens?: Prisma.SortOrder
+  defaultLanguage?: Prisma.SortOrder
+  defaultBrandVoiceId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -419,6 +461,8 @@ export type AISettingsMinOrderByAggregateInput = {
   defaultModel?: Prisma.SortOrder
   temperature?: Prisma.SortOrder
   maxTokens?: Prisma.SortOrder
+  defaultLanguage?: Prisma.SortOrder
+  defaultBrandVoiceId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -474,6 +518,8 @@ export type AISettingsCreateWithoutTenantInput = {
   defaultModel?: string
   temperature?: number
   maxTokens?: number
+  defaultLanguage?: $Enums.Language
+  defaultBrandVoiceId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -484,6 +530,8 @@ export type AISettingsUncheckedCreateWithoutTenantInput = {
   defaultModel?: string
   temperature?: number
   maxTokens?: number
+  defaultLanguage?: $Enums.Language
+  defaultBrandVoiceId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -510,6 +558,8 @@ export type AISettingsUpdateWithoutTenantInput = {
   defaultModel?: Prisma.StringFieldUpdateOperationsInput | string
   temperature?: Prisma.FloatFieldUpdateOperationsInput | number
   maxTokens?: Prisma.IntFieldUpdateOperationsInput | number
+  defaultLanguage?: Prisma.EnumLanguageFieldUpdateOperationsInput | $Enums.Language
+  defaultBrandVoiceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -520,6 +570,8 @@ export type AISettingsUncheckedUpdateWithoutTenantInput = {
   defaultModel?: Prisma.StringFieldUpdateOperationsInput | string
   temperature?: Prisma.FloatFieldUpdateOperationsInput | number
   maxTokens?: Prisma.IntFieldUpdateOperationsInput | number
+  defaultLanguage?: Prisma.EnumLanguageFieldUpdateOperationsInput | $Enums.Language
+  defaultBrandVoiceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -533,6 +585,8 @@ export type AISettingsSelect<ExtArgs extends runtime.Types.Extensions.InternalAr
   defaultModel?: boolean
   temperature?: boolean
   maxTokens?: boolean
+  defaultLanguage?: boolean
+  defaultBrandVoiceId?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   tenant?: boolean | Prisma.TenantDefaultArgs<ExtArgs>
@@ -545,6 +599,8 @@ export type AISettingsSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Ex
   defaultModel?: boolean
   temperature?: boolean
   maxTokens?: boolean
+  defaultLanguage?: boolean
+  defaultBrandVoiceId?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   tenant?: boolean | Prisma.TenantDefaultArgs<ExtArgs>
@@ -557,6 +613,8 @@ export type AISettingsSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Ex
   defaultModel?: boolean
   temperature?: boolean
   maxTokens?: boolean
+  defaultLanguage?: boolean
+  defaultBrandVoiceId?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   tenant?: boolean | Prisma.TenantDefaultArgs<ExtArgs>
@@ -569,11 +627,13 @@ export type AISettingsSelectScalar = {
   defaultModel?: boolean
   temperature?: boolean
   maxTokens?: boolean
+  defaultLanguage?: boolean
+  defaultBrandVoiceId?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type AISettingsOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "tenantId" | "defaultProvider" | "defaultModel" | "temperature" | "maxTokens" | "createdAt" | "updatedAt", ExtArgs["result"]["aISettings"]>
+export type AISettingsOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "tenantId" | "defaultProvider" | "defaultModel" | "temperature" | "maxTokens" | "defaultLanguage" | "defaultBrandVoiceId" | "createdAt" | "updatedAt", ExtArgs["result"]["aISettings"]>
 export type AISettingsInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   tenant?: boolean | Prisma.TenantDefaultArgs<ExtArgs>
 }
@@ -596,6 +656,8 @@ export type $AISettingsPayload<ExtArgs extends runtime.Types.Extensions.Internal
     defaultModel: string
     temperature: number
     maxTokens: number
+    defaultLanguage: $Enums.Language
+    defaultBrandVoiceId: string | null
     createdAt: Date
     updatedAt: Date
   }, ExtArgs["result"]["aISettings"]>
@@ -1028,6 +1090,8 @@ export interface AISettingsFieldRefs {
   readonly defaultModel: Prisma.FieldRef<"AISettings", 'String'>
   readonly temperature: Prisma.FieldRef<"AISettings", 'Float'>
   readonly maxTokens: Prisma.FieldRef<"AISettings", 'Int'>
+  readonly defaultLanguage: Prisma.FieldRef<"AISettings", 'Language'>
+  readonly defaultBrandVoiceId: Prisma.FieldRef<"AISettings", 'String'>
   readonly createdAt: Prisma.FieldRef<"AISettings", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"AISettings", 'DateTime'>
 }

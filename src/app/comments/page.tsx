@@ -15,6 +15,9 @@ interface Comment {
   status: string;
   reply?: string;
   repliedAt?: string;
+  replyType?: string;
+  brandVoiceId?: string;
+  modelUsed?: string;
   createdAt: string;
   page: {
     pageName: string;
@@ -24,12 +27,24 @@ interface Comment {
   };
 }
 
+const STATUS_TABS = [
+  { value: '', label: 'All' },
+  { value: 'PENDING', label: 'Pending' },
+  { value: 'REPLIED', label: 'Replied' },
+  { value: 'ESCALATED', label: 'Escalated' },
+  { value: 'PROCESSING', label: 'Processing' },
+  { value: 'FAILED', label: 'Failed' },
+];
+
 export default function CommentsPage() {
   const [comments, setComments] = useState<Comment[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<string>('');
   const [page, setPage] = useState(1);
   const [total, setTotal] = useState(0);
+  const [replyingTo, setReplyingTo] = useState<string | null>(null);
+  const [replyText, setReplyText] = useState('');
+  const [sendingReply, setSendingReply] = useState(false);
   const { token, user, isLoading } = useAuth();
 
   useEffect(() => {
@@ -67,14 +82,41 @@ export default function CommentsPage() {
     }
   };
 
+  const handleManualReply = async (commentId: string) => {
+    if (!replyText.trim()) return;
+    setSendingReply(true);
+    try {
+      const response = await fetch(`/api/comments/${commentId}/reply`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) },
+        body: JSON.stringify({ reply: replyText }),
+      });
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.error || 'Failed to send reply');
+      }
+      setReplyingTo(null);
+      setReplyText('');
+      fetchComments();
+    } catch (error: any) {
+      alert(error.message || 'Failed to send reply');
+    } finally {
+      setSendingReply(false);
+    }
+  };
+
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'replied':
+      case 'REPLIED':
         return 'bg-green-100 text-green-800';
-      case 'pending':
+      case 'PENDING':
         return 'bg-yellow-100 text-yellow-800';
-      case 'ignored':
-        return 'bg-gray-100 text-gray-800';
+      case 'ESCALATED':
+        return 'bg-red-100 text-red-800';
+      case 'PROCESSING':
+        return 'bg-blue-100 text-blue-800';
+      case 'FAILED':
+        return 'bg-gray-100 text-gray-600';
       default:
         return 'bg-gray-100 text-gray-800';
     }
@@ -91,22 +133,22 @@ export default function CommentsPage() {
           </div>
         </div>
 
-        {/* Filters */}
-        <div className="flex gap-2 mb-6">
-          {['', 'pending', 'replied', 'ignored'].map((status) => (
+        {/* Status Tabs */}
+        <div className="flex gap-2 mb-6 flex-wrap">
+          {STATUS_TABS.map((tab) => (
             <button
-              key={status}
+              key={tab.value}
               onClick={() => {
-                setFilter(status);
+                setFilter(tab.value);
                 setPage(1);
               }}
               className={`px-4 py-2 rounded-lg text-sm font-medium ${
-                filter === status
+                filter === tab.value
                   ? 'bg-blue-600 text-white'
                   : 'bg-white text-gray-700 hover:bg-gray-100'
               }`}
             >
-              {status || 'All'}
+              {tab.label}
             </button>
           ))}
         </div>
@@ -148,6 +190,11 @@ export default function CommentsPage() {
                         {comment.rule.name}
                       </span>
                     )}
+                    {comment.replyType && (
+                      <span className="px-2 py-0.5 text-xs bg-indigo-100 text-indigo-800 rounded">
+                        {comment.replyType}
+                      </span>
+                    )}
                     <span
                       className={`px-2 py-0.5 text-xs rounded-full ${getStatusColor(
                         comment.status
@@ -163,18 +210,61 @@ export default function CommentsPage() {
                 </div>
 
                 {comment.reply && (
-                  <div className="bg-blue-50 rounded-lg p-4 ml-8">
+                  <div className="bg-blue-50 rounded-lg p-4 ml-8 mb-4">
                     <div className="flex items-center gap-2 mb-2">
                       <span className="text-sm font-medium text-blue-800">
-                        Auto-reply
+                        {comment.replyType === 'AI' ? 'AI Reply' : comment.replyType === 'MANUAL' ? 'Manual Reply' : 'Auto-reply'}
                       </span>
                       {comment.repliedAt && (
                         <span className="text-xs text-blue-600">
                           {new Date(comment.repliedAt).toLocaleString()}
                         </span>
                       )}
+                      {comment.modelUsed && (
+                        <span className="text-xs text-gray-500">
+                          ({comment.modelUsed})
+                        </span>
+                      )}
                     </div>
                     <p className="text-blue-900">{comment.reply}</p>
+                  </div>
+                )}
+
+                {/* Manual Reply Input */}
+                {comment.status !== 'REPLIED' && comment.status !== 'ESCALATED' && (
+                  <div className="ml-8">
+                    {replyingTo === comment.id ? (
+                      <div className="flex gap-2">
+                        <input
+                          type="text"
+                          value={replyText}
+                          onChange={(e) => setReplyText(e.target.value)}
+                          placeholder="Type your reply..."
+                          className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
+                          onKeyDown={(e) => e.key === 'Enter' && handleManualReply(comment.id)}
+                        />
+                        <Button
+                          onClick={() => handleManualReply(comment.id)}
+                          disabled={sendingReply || !replyText.trim()}
+                          className="bg-blue-600 hover:bg-blue-700 text-sm"
+                        >
+                          {sendingReply ? 'Sending...' : 'Send'}
+                        </Button>
+                        <Button
+                          onClick={() => { setReplyingTo(null); setReplyText(''); }}
+                          className="bg-gray-200 hover:bg-gray-300 text-gray-800 text-sm"
+                        >
+                          Cancel
+                        </Button>
+                      </div>
+                    ) : (
+                      <button
+                        onClick={() => setReplyingTo(comment.id)}
+                        className="text-sm text-blue-600 hover:text-blue-800"
+                      >
+                        Reply manually...
+                      </button>
+                    )}
                   </div>
                 )}
               </div>

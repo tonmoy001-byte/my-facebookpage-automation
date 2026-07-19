@@ -32,6 +32,8 @@ export type PostMinAggregateOutputType = {
   content: string | null
   mediaType: string | null
   brandVoice: string | null
+  autoReply: boolean | null
+  language: $Enums.Language | null
   status: string | null
   facebookPostId: string | null
   publishedAt: Date | null
@@ -48,6 +50,8 @@ export type PostMaxAggregateOutputType = {
   content: string | null
   mediaType: string | null
   brandVoice: string | null
+  autoReply: boolean | null
+  language: $Enums.Language | null
   status: string | null
   facebookPostId: string | null
   publishedAt: Date | null
@@ -65,6 +69,8 @@ export type PostCountAggregateOutputType = {
   mediaUrls: number
   mediaType: number
   brandVoice: number
+  autoReply: number
+  language: number
   status: number
   facebookPostId: number
   publishedAt: number
@@ -83,6 +89,8 @@ export type PostMinAggregateInputType = {
   content?: true
   mediaType?: true
   brandVoice?: true
+  autoReply?: true
+  language?: true
   status?: true
   facebookPostId?: true
   publishedAt?: true
@@ -99,6 +107,8 @@ export type PostMaxAggregateInputType = {
   content?: true
   mediaType?: true
   brandVoice?: true
+  autoReply?: true
+  language?: true
   status?: true
   facebookPostId?: true
   publishedAt?: true
@@ -116,6 +126,8 @@ export type PostCountAggregateInputType = {
   mediaUrls?: true
   mediaType?: true
   brandVoice?: true
+  autoReply?: true
+  language?: true
   status?: true
   facebookPostId?: true
   publishedAt?: true
@@ -206,6 +218,8 @@ export type PostGroupByOutputType = {
   mediaUrls: string[]
   mediaType: string
   brandVoice: string
+  autoReply: boolean
+  language: $Enums.Language
   status: string
   facebookPostId: string | null
   publishedAt: Date | null
@@ -244,6 +258,8 @@ export type PostWhereInput = {
   mediaUrls?: Prisma.StringNullableListFilter<"Post">
   mediaType?: Prisma.StringFilter<"Post"> | string
   brandVoice?: Prisma.StringFilter<"Post"> | string
+  autoReply?: Prisma.BoolFilter<"Post"> | boolean
+  language?: Prisma.EnumLanguageFilter<"Post"> | $Enums.Language
   status?: Prisma.StringFilter<"Post"> | string
   facebookPostId?: Prisma.StringNullableFilter<"Post"> | string | null
   publishedAt?: Prisma.DateTimeNullableFilter<"Post"> | Date | string | null
@@ -267,6 +283,8 @@ export type PostOrderByWithRelationInput = {
   mediaUrls?: Prisma.SortOrder
   mediaType?: Prisma.SortOrder
   brandVoice?: Prisma.SortOrder
+  autoReply?: Prisma.SortOrder
+  language?: Prisma.SortOrder
   status?: Prisma.SortOrder
   facebookPostId?: Prisma.SortOrderInput | Prisma.SortOrder
   publishedAt?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -293,6 +311,8 @@ export type PostWhereUniqueInput = Prisma.AtLeast<{
   mediaUrls?: Prisma.StringNullableListFilter<"Post">
   mediaType?: Prisma.StringFilter<"Post"> | string
   brandVoice?: Prisma.StringFilter<"Post"> | string
+  autoReply?: Prisma.BoolFilter<"Post"> | boolean
+  language?: Prisma.EnumLanguageFilter<"Post"> | $Enums.Language
   status?: Prisma.StringFilter<"Post"> | string
   facebookPostId?: Prisma.StringNullableFilter<"Post"> | string | null
   publishedAt?: Prisma.DateTimeNullableFilter<"Post"> | Date | string | null
@@ -316,6 +336,8 @@ export type PostOrderByWithAggregationInput = {
   mediaUrls?: Prisma.SortOrder
   mediaType?: Prisma.SortOrder
   brandVoice?: Prisma.SortOrder
+  autoReply?: Prisma.SortOrder
+  language?: Prisma.SortOrder
   status?: Prisma.SortOrder
   facebookPostId?: Prisma.SortOrderInput | Prisma.SortOrder
   publishedAt?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -339,6 +361,8 @@ export type PostScalarWhereWithAggregatesInput = {
   mediaUrls?: Prisma.StringNullableListFilter<"Post">
   mediaType?: Prisma.StringWithAggregatesFilter<"Post"> | string
   brandVoice?: Prisma.StringWithAggregatesFilter<"Post"> | string
+  autoReply?: Prisma.BoolWithAggregatesFilter<"Post"> | boolean
+  language?: Prisma.EnumLanguageWithAggregatesFilter<"Post"> | $Enums.Language
   status?: Prisma.StringWithAggregatesFilter<"Post"> | string
   facebookPostId?: Prisma.StringNullableWithAggregatesFilter<"Post"> | string | null
   publishedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Post"> | Date | string | null
@@ -353,6 +377,8 @@ export type PostCreateInput = {
   mediaUrls?: Prisma.PostCreatemediaUrlsInput | string[]
   mediaType?: string
   brandVoice?: string
+  autoReply?: boolean
+  language?: $Enums.Language
   status?: string
   facebookPostId?: string | null
   publishedAt?: Date | string | null
@@ -376,6 +402,8 @@ export type PostUncheckedCreateInput = {
   mediaUrls?: Prisma.PostCreatemediaUrlsInput | string[]
   mediaType?: string
   brandVoice?: string
+  autoReply?: boolean
+  language?: $Enums.Language
   status?: string
   facebookPostId?: string | null
   publishedAt?: Date | string | null
@@ -393,6 +421,8 @@ export type PostUpdateInput = {
   mediaUrls?: Prisma.PostUpdatemediaUrlsInput | string[]
   mediaType?: Prisma.StringFieldUpdateOperationsInput | string
   brandVoice?: Prisma.StringFieldUpdateOperationsInput | string
+  autoReply?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  language?: Prisma.EnumLanguageFieldUpdateOperationsInput | $Enums.Language
   status?: Prisma.StringFieldUpdateOperationsInput | string
   facebookPostId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   publishedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -416,6 +446,8 @@ export type PostUncheckedUpdateInput = {
   mediaUrls?: Prisma.PostUpdatemediaUrlsInput | string[]
   mediaType?: Prisma.StringFieldUpdateOperationsInput | string
   brandVoice?: Prisma.StringFieldUpdateOperationsInput | string
+  autoReply?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  language?: Prisma.EnumLanguageFieldUpdateOperationsInput | $Enums.Language
   status?: Prisma.StringFieldUpdateOperationsInput | string
   facebookPostId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   publishedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -436,6 +468,8 @@ export type PostCreateManyInput = {
   mediaUrls?: Prisma.PostCreatemediaUrlsInput | string[]
   mediaType?: string
   brandVoice?: string
+  autoReply?: boolean
+  language?: $Enums.Language
   status?: string
   facebookPostId?: string | null
   publishedAt?: Date | string | null
@@ -450,6 +484,8 @@ export type PostUpdateManyMutationInput = {
   mediaUrls?: Prisma.PostUpdatemediaUrlsInput | string[]
   mediaType?: Prisma.StringFieldUpdateOperationsInput | string
   brandVoice?: Prisma.StringFieldUpdateOperationsInput | string
+  autoReply?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  language?: Prisma.EnumLanguageFieldUpdateOperationsInput | $Enums.Language
   status?: Prisma.StringFieldUpdateOperationsInput | string
   facebookPostId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   publishedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -467,6 +503,8 @@ export type PostUncheckedUpdateManyInput = {
   mediaUrls?: Prisma.PostUpdatemediaUrlsInput | string[]
   mediaType?: Prisma.StringFieldUpdateOperationsInput | string
   brandVoice?: Prisma.StringFieldUpdateOperationsInput | string
+  autoReply?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  language?: Prisma.EnumLanguageFieldUpdateOperationsInput | $Enums.Language
   status?: Prisma.StringFieldUpdateOperationsInput | string
   facebookPostId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   publishedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -502,6 +540,8 @@ export type PostCountOrderByAggregateInput = {
   mediaUrls?: Prisma.SortOrder
   mediaType?: Prisma.SortOrder
   brandVoice?: Prisma.SortOrder
+  autoReply?: Prisma.SortOrder
+  language?: Prisma.SortOrder
   status?: Prisma.SortOrder
   facebookPostId?: Prisma.SortOrder
   publishedAt?: Prisma.SortOrder
@@ -518,6 +558,8 @@ export type PostMaxOrderByAggregateInput = {
   content?: Prisma.SortOrder
   mediaType?: Prisma.SortOrder
   brandVoice?: Prisma.SortOrder
+  autoReply?: Prisma.SortOrder
+  language?: Prisma.SortOrder
   status?: Prisma.SortOrder
   facebookPostId?: Prisma.SortOrder
   publishedAt?: Prisma.SortOrder
@@ -534,6 +576,8 @@ export type PostMinOrderByAggregateInput = {
   content?: Prisma.SortOrder
   mediaType?: Prisma.SortOrder
   brandVoice?: Prisma.SortOrder
+  autoReply?: Prisma.SortOrder
+  language?: Prisma.SortOrder
   status?: Prisma.SortOrder
   facebookPostId?: Prisma.SortOrder
   publishedAt?: Prisma.SortOrder
@@ -687,6 +731,14 @@ export type PostUpdatemediaUrlsInput = {
   push?: string | string[]
 }
 
+export type BoolFieldUpdateOperationsInput = {
+  set?: boolean
+}
+
+export type EnumLanguageFieldUpdateOperationsInput = {
+  set?: $Enums.Language
+}
+
 export type NullableStringFieldUpdateOperationsInput = {
   set?: string | null
 }
@@ -745,6 +797,8 @@ export type PostCreateWithoutTenantInput = {
   mediaUrls?: Prisma.PostCreatemediaUrlsInput | string[]
   mediaType?: string
   brandVoice?: string
+  autoReply?: boolean
+  language?: $Enums.Language
   status?: string
   facebookPostId?: string | null
   publishedAt?: Date | string | null
@@ -766,6 +820,8 @@ export type PostUncheckedCreateWithoutTenantInput = {
   mediaUrls?: Prisma.PostCreatemediaUrlsInput | string[]
   mediaType?: string
   brandVoice?: string
+  autoReply?: boolean
+  language?: $Enums.Language
   status?: string
   facebookPostId?: string | null
   publishedAt?: Date | string | null
@@ -815,6 +871,8 @@ export type PostScalarWhereInput = {
   mediaUrls?: Prisma.StringNullableListFilter<"Post">
   mediaType?: Prisma.StringFilter<"Post"> | string
   brandVoice?: Prisma.StringFilter<"Post"> | string
+  autoReply?: Prisma.BoolFilter<"Post"> | boolean
+  language?: Prisma.EnumLanguageFilter<"Post"> | $Enums.Language
   status?: Prisma.StringFilter<"Post"> | string
   facebookPostId?: Prisma.StringNullableFilter<"Post"> | string | null
   publishedAt?: Prisma.DateTimeNullableFilter<"Post"> | Date | string | null
@@ -829,6 +887,8 @@ export type PostCreateWithoutUserInput = {
   mediaUrls?: Prisma.PostCreatemediaUrlsInput | string[]
   mediaType?: string
   brandVoice?: string
+  autoReply?: boolean
+  language?: $Enums.Language
   status?: string
   facebookPostId?: string | null
   publishedAt?: Date | string | null
@@ -850,6 +910,8 @@ export type PostUncheckedCreateWithoutUserInput = {
   mediaUrls?: Prisma.PostCreatemediaUrlsInput | string[]
   mediaType?: string
   brandVoice?: string
+  autoReply?: boolean
+  language?: $Enums.Language
   status?: string
   facebookPostId?: string | null
   publishedAt?: Date | string | null
@@ -893,6 +955,8 @@ export type PostCreateWithoutPageInput = {
   mediaUrls?: Prisma.PostCreatemediaUrlsInput | string[]
   mediaType?: string
   brandVoice?: string
+  autoReply?: boolean
+  language?: $Enums.Language
   status?: string
   facebookPostId?: string | null
   publishedAt?: Date | string | null
@@ -914,6 +978,8 @@ export type PostUncheckedCreateWithoutPageInput = {
   mediaUrls?: Prisma.PostCreatemediaUrlsInput | string[]
   mediaType?: string
   brandVoice?: string
+  autoReply?: boolean
+  language?: $Enums.Language
   status?: string
   facebookPostId?: string | null
   publishedAt?: Date | string | null
@@ -957,6 +1023,8 @@ export type PostCreateWithoutPublishJobInput = {
   mediaUrls?: Prisma.PostCreatemediaUrlsInput | string[]
   mediaType?: string
   brandVoice?: string
+  autoReply?: boolean
+  language?: $Enums.Language
   status?: string
   facebookPostId?: string | null
   publishedAt?: Date | string | null
@@ -979,6 +1047,8 @@ export type PostUncheckedCreateWithoutPublishJobInput = {
   mediaUrls?: Prisma.PostCreatemediaUrlsInput | string[]
   mediaType?: string
   brandVoice?: string
+  autoReply?: boolean
+  language?: $Enums.Language
   status?: string
   facebookPostId?: string | null
   publishedAt?: Date | string | null
@@ -1011,6 +1081,8 @@ export type PostUpdateWithoutPublishJobInput = {
   mediaUrls?: Prisma.PostUpdatemediaUrlsInput | string[]
   mediaType?: Prisma.StringFieldUpdateOperationsInput | string
   brandVoice?: Prisma.StringFieldUpdateOperationsInput | string
+  autoReply?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  language?: Prisma.EnumLanguageFieldUpdateOperationsInput | $Enums.Language
   status?: Prisma.StringFieldUpdateOperationsInput | string
   facebookPostId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   publishedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1033,6 +1105,8 @@ export type PostUncheckedUpdateWithoutPublishJobInput = {
   mediaUrls?: Prisma.PostUpdatemediaUrlsInput | string[]
   mediaType?: Prisma.StringFieldUpdateOperationsInput | string
   brandVoice?: Prisma.StringFieldUpdateOperationsInput | string
+  autoReply?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  language?: Prisma.EnumLanguageFieldUpdateOperationsInput | $Enums.Language
   status?: Prisma.StringFieldUpdateOperationsInput | string
   facebookPostId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   publishedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1049,6 +1123,8 @@ export type PostCreateWithoutCommentsInput = {
   mediaUrls?: Prisma.PostCreatemediaUrlsInput | string[]
   mediaType?: string
   brandVoice?: string
+  autoReply?: boolean
+  language?: $Enums.Language
   status?: string
   facebookPostId?: string | null
   publishedAt?: Date | string | null
@@ -1071,6 +1147,8 @@ export type PostUncheckedCreateWithoutCommentsInput = {
   mediaUrls?: Prisma.PostCreatemediaUrlsInput | string[]
   mediaType?: string
   brandVoice?: string
+  autoReply?: boolean
+  language?: $Enums.Language
   status?: string
   facebookPostId?: string | null
   publishedAt?: Date | string | null
@@ -1103,6 +1181,8 @@ export type PostUpdateWithoutCommentsInput = {
   mediaUrls?: Prisma.PostUpdatemediaUrlsInput | string[]
   mediaType?: Prisma.StringFieldUpdateOperationsInput | string
   brandVoice?: Prisma.StringFieldUpdateOperationsInput | string
+  autoReply?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  language?: Prisma.EnumLanguageFieldUpdateOperationsInput | $Enums.Language
   status?: Prisma.StringFieldUpdateOperationsInput | string
   facebookPostId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   publishedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1125,6 +1205,8 @@ export type PostUncheckedUpdateWithoutCommentsInput = {
   mediaUrls?: Prisma.PostUpdatemediaUrlsInput | string[]
   mediaType?: Prisma.StringFieldUpdateOperationsInput | string
   brandVoice?: Prisma.StringFieldUpdateOperationsInput | string
+  autoReply?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  language?: Prisma.EnumLanguageFieldUpdateOperationsInput | $Enums.Language
   status?: Prisma.StringFieldUpdateOperationsInput | string
   facebookPostId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   publishedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1141,6 +1223,8 @@ export type PostCreateWithoutAnalyticsInput = {
   mediaUrls?: Prisma.PostCreatemediaUrlsInput | string[]
   mediaType?: string
   brandVoice?: string
+  autoReply?: boolean
+  language?: $Enums.Language
   status?: string
   facebookPostId?: string | null
   publishedAt?: Date | string | null
@@ -1163,6 +1247,8 @@ export type PostUncheckedCreateWithoutAnalyticsInput = {
   mediaUrls?: Prisma.PostCreatemediaUrlsInput | string[]
   mediaType?: string
   brandVoice?: string
+  autoReply?: boolean
+  language?: $Enums.Language
   status?: string
   facebookPostId?: string | null
   publishedAt?: Date | string | null
@@ -1195,6 +1281,8 @@ export type PostUpdateWithoutAnalyticsInput = {
   mediaUrls?: Prisma.PostUpdatemediaUrlsInput | string[]
   mediaType?: Prisma.StringFieldUpdateOperationsInput | string
   brandVoice?: Prisma.StringFieldUpdateOperationsInput | string
+  autoReply?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  language?: Prisma.EnumLanguageFieldUpdateOperationsInput | $Enums.Language
   status?: Prisma.StringFieldUpdateOperationsInput | string
   facebookPostId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   publishedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1217,6 +1305,8 @@ export type PostUncheckedUpdateWithoutAnalyticsInput = {
   mediaUrls?: Prisma.PostUpdatemediaUrlsInput | string[]
   mediaType?: Prisma.StringFieldUpdateOperationsInput | string
   brandVoice?: Prisma.StringFieldUpdateOperationsInput | string
+  autoReply?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  language?: Prisma.EnumLanguageFieldUpdateOperationsInput | $Enums.Language
   status?: Prisma.StringFieldUpdateOperationsInput | string
   facebookPostId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   publishedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1235,6 +1325,8 @@ export type PostCreateManyTenantInput = {
   mediaUrls?: Prisma.PostCreatemediaUrlsInput | string[]
   mediaType?: string
   brandVoice?: string
+  autoReply?: boolean
+  language?: $Enums.Language
   status?: string
   facebookPostId?: string | null
   publishedAt?: Date | string | null
@@ -1249,6 +1341,8 @@ export type PostUpdateWithoutTenantInput = {
   mediaUrls?: Prisma.PostUpdatemediaUrlsInput | string[]
   mediaType?: Prisma.StringFieldUpdateOperationsInput | string
   brandVoice?: Prisma.StringFieldUpdateOperationsInput | string
+  autoReply?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  language?: Prisma.EnumLanguageFieldUpdateOperationsInput | $Enums.Language
   status?: Prisma.StringFieldUpdateOperationsInput | string
   facebookPostId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   publishedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1270,6 +1364,8 @@ export type PostUncheckedUpdateWithoutTenantInput = {
   mediaUrls?: Prisma.PostUpdatemediaUrlsInput | string[]
   mediaType?: Prisma.StringFieldUpdateOperationsInput | string
   brandVoice?: Prisma.StringFieldUpdateOperationsInput | string
+  autoReply?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  language?: Prisma.EnumLanguageFieldUpdateOperationsInput | $Enums.Language
   status?: Prisma.StringFieldUpdateOperationsInput | string
   facebookPostId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   publishedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1289,6 +1385,8 @@ export type PostUncheckedUpdateManyWithoutTenantInput = {
   mediaUrls?: Prisma.PostUpdatemediaUrlsInput | string[]
   mediaType?: Prisma.StringFieldUpdateOperationsInput | string
   brandVoice?: Prisma.StringFieldUpdateOperationsInput | string
+  autoReply?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  language?: Prisma.EnumLanguageFieldUpdateOperationsInput | $Enums.Language
   status?: Prisma.StringFieldUpdateOperationsInput | string
   facebookPostId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   publishedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1305,6 +1403,8 @@ export type PostCreateManyUserInput = {
   mediaUrls?: Prisma.PostCreatemediaUrlsInput | string[]
   mediaType?: string
   brandVoice?: string
+  autoReply?: boolean
+  language?: $Enums.Language
   status?: string
   facebookPostId?: string | null
   publishedAt?: Date | string | null
@@ -1319,6 +1419,8 @@ export type PostUpdateWithoutUserInput = {
   mediaUrls?: Prisma.PostUpdatemediaUrlsInput | string[]
   mediaType?: Prisma.StringFieldUpdateOperationsInput | string
   brandVoice?: Prisma.StringFieldUpdateOperationsInput | string
+  autoReply?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  language?: Prisma.EnumLanguageFieldUpdateOperationsInput | $Enums.Language
   status?: Prisma.StringFieldUpdateOperationsInput | string
   facebookPostId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   publishedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1340,6 +1442,8 @@ export type PostUncheckedUpdateWithoutUserInput = {
   mediaUrls?: Prisma.PostUpdatemediaUrlsInput | string[]
   mediaType?: Prisma.StringFieldUpdateOperationsInput | string
   brandVoice?: Prisma.StringFieldUpdateOperationsInput | string
+  autoReply?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  language?: Prisma.EnumLanguageFieldUpdateOperationsInput | $Enums.Language
   status?: Prisma.StringFieldUpdateOperationsInput | string
   facebookPostId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   publishedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1359,6 +1463,8 @@ export type PostUncheckedUpdateManyWithoutUserInput = {
   mediaUrls?: Prisma.PostUpdatemediaUrlsInput | string[]
   mediaType?: Prisma.StringFieldUpdateOperationsInput | string
   brandVoice?: Prisma.StringFieldUpdateOperationsInput | string
+  autoReply?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  language?: Prisma.EnumLanguageFieldUpdateOperationsInput | $Enums.Language
   status?: Prisma.StringFieldUpdateOperationsInput | string
   facebookPostId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   publishedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1375,6 +1481,8 @@ export type PostCreateManyPageInput = {
   mediaUrls?: Prisma.PostCreatemediaUrlsInput | string[]
   mediaType?: string
   brandVoice?: string
+  autoReply?: boolean
+  language?: $Enums.Language
   status?: string
   facebookPostId?: string | null
   publishedAt?: Date | string | null
@@ -1389,6 +1497,8 @@ export type PostUpdateWithoutPageInput = {
   mediaUrls?: Prisma.PostUpdatemediaUrlsInput | string[]
   mediaType?: Prisma.StringFieldUpdateOperationsInput | string
   brandVoice?: Prisma.StringFieldUpdateOperationsInput | string
+  autoReply?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  language?: Prisma.EnumLanguageFieldUpdateOperationsInput | $Enums.Language
   status?: Prisma.StringFieldUpdateOperationsInput | string
   facebookPostId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   publishedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1410,6 +1520,8 @@ export type PostUncheckedUpdateWithoutPageInput = {
   mediaUrls?: Prisma.PostUpdatemediaUrlsInput | string[]
   mediaType?: Prisma.StringFieldUpdateOperationsInput | string
   brandVoice?: Prisma.StringFieldUpdateOperationsInput | string
+  autoReply?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  language?: Prisma.EnumLanguageFieldUpdateOperationsInput | $Enums.Language
   status?: Prisma.StringFieldUpdateOperationsInput | string
   facebookPostId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   publishedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1429,6 +1541,8 @@ export type PostUncheckedUpdateManyWithoutPageInput = {
   mediaUrls?: Prisma.PostUpdatemediaUrlsInput | string[]
   mediaType?: Prisma.StringFieldUpdateOperationsInput | string
   brandVoice?: Prisma.StringFieldUpdateOperationsInput | string
+  autoReply?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  language?: Prisma.EnumLanguageFieldUpdateOperationsInput | $Enums.Language
   status?: Prisma.StringFieldUpdateOperationsInput | string
   facebookPostId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   publishedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1486,6 +1600,8 @@ export type PostSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   mediaUrls?: boolean
   mediaType?: boolean
   brandVoice?: boolean
+  autoReply?: boolean
+  language?: boolean
   status?: boolean
   facebookPostId?: boolean
   publishedAt?: boolean
@@ -1510,6 +1626,8 @@ export type PostSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   mediaUrls?: boolean
   mediaType?: boolean
   brandVoice?: boolean
+  autoReply?: boolean
+  language?: boolean
   status?: boolean
   facebookPostId?: boolean
   publishedAt?: boolean
@@ -1530,6 +1648,8 @@ export type PostSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   mediaUrls?: boolean
   mediaType?: boolean
   brandVoice?: boolean
+  autoReply?: boolean
+  language?: boolean
   status?: boolean
   facebookPostId?: boolean
   publishedAt?: boolean
@@ -1550,6 +1670,8 @@ export type PostSelectScalar = {
   mediaUrls?: boolean
   mediaType?: boolean
   brandVoice?: boolean
+  autoReply?: boolean
+  language?: boolean
   status?: boolean
   facebookPostId?: boolean
   publishedAt?: boolean
@@ -1558,7 +1680,7 @@ export type PostSelectScalar = {
   updatedAt?: boolean
 }
 
-export type PostOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "tenantId" | "pageId" | "content" | "mediaUrls" | "mediaType" | "brandVoice" | "status" | "facebookPostId" | "publishedAt" | "errorMessage" | "createdAt" | "updatedAt", ExtArgs["result"]["post"]>
+export type PostOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "tenantId" | "pageId" | "content" | "mediaUrls" | "mediaType" | "brandVoice" | "autoReply" | "language" | "status" | "facebookPostId" | "publishedAt" | "errorMessage" | "createdAt" | "updatedAt", ExtArgs["result"]["post"]>
 export type PostInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   tenant?: boolean | Prisma.TenantDefaultArgs<ExtArgs>
@@ -1598,6 +1720,8 @@ export type $PostPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     mediaUrls: string[]
     mediaType: string
     brandVoice: string
+    autoReply: boolean
+    language: $Enums.Language
     status: string
     facebookPostId: string | null
     publishedAt: Date | null
@@ -2041,6 +2165,8 @@ export interface PostFieldRefs {
   readonly mediaUrls: Prisma.FieldRef<"Post", 'String[]'>
   readonly mediaType: Prisma.FieldRef<"Post", 'String'>
   readonly brandVoice: Prisma.FieldRef<"Post", 'String'>
+  readonly autoReply: Prisma.FieldRef<"Post", 'Boolean'>
+  readonly language: Prisma.FieldRef<"Post", 'Language'>
   readonly status: Prisma.FieldRef<"Post", 'String'>
   readonly facebookPostId: Prisma.FieldRef<"Post", 'String'>
   readonly publishedAt: Prisma.FieldRef<"Post", 'DateTime'>

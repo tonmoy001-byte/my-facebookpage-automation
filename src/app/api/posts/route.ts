@@ -48,7 +48,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
     }
 
-    const { caption, hashtags, imageUrl, mediaUrls, brandVoiceId, scheduledAt, timezone } = await request.json();
+    const { caption, hashtags, imageUrl, mediaUrls, brandVoiceId, scheduledAt, timezone, autoReply, language } = await request.json();
 
     if (!caption) {
       return NextResponse.json({ error: 'Caption is required' }, { status: 400 });
@@ -86,6 +86,8 @@ export async function POST(request: Request) {
         mediaType,
         brandVoice: brandVoiceId || 'professional',
         status: scheduledAt ? 'scheduled' : 'draft',
+        autoReply: autoReply === true,
+        language: language || 'EN',
       }),
     });
 

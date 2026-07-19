@@ -134,6 +134,8 @@ export const PostScalarFieldEnum = {
   mediaUrls: 'mediaUrls',
   mediaType: 'mediaType',
   brandVoice: 'brandVoice',
+  autoReply: 'autoReply',
+  language: 'language',
   status: 'status',
   facebookPostId: 'facebookPostId',
   publishedAt: 'publishedAt',
@@ -195,6 +197,9 @@ export const CommentScalarFieldEnum = {
   status: 'status',
   reply: 'reply',
   repliedAt: 'repliedAt',
+  replyType: 'replyType',
+  brandVoiceId: 'brandVoiceId',
+  modelUsed: 'modelUsed',
   createdAt: 'createdAt'
 } as const
 
@@ -216,6 +221,7 @@ export const ReplyRuleScalarFieldEnum = {
   endTime: 'endTime',
   replyTemplate: 'replyTemplate',
   action: 'action',
+  brandVoiceId: 'brandVoiceId',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -295,6 +301,8 @@ export const AISettingsScalarFieldEnum = {
   defaultModel: 'defaultModel',
   temperature: 'temperature',
   maxTokens: 'maxTokens',
+  defaultLanguage: 'defaultLanguage',
+  defaultBrandVoiceId: 'defaultBrandVoiceId',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -312,6 +320,7 @@ export const BrandVoiceScalarFieldEnum = {
   examples: 'examples',
   isDefault: 'isDefault',
   isGlobal: 'isGlobal',
+  isPreset: 'isPreset',
   tenantId: 'tenantId',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'

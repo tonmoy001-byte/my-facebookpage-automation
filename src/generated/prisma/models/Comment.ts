@@ -35,9 +35,12 @@ export type CommentMinAggregateOutputType = {
   authorName: string | null
   authorId: string | null
   content: string | null
-  status: string | null
+  status: $Enums.CommentStatus | null
   reply: string | null
   repliedAt: Date | null
+  replyType: string | null
+  brandVoiceId: string | null
+  modelUsed: string | null
   createdAt: Date | null
 }
 
@@ -52,9 +55,12 @@ export type CommentMaxAggregateOutputType = {
   authorName: string | null
   authorId: string | null
   content: string | null
-  status: string | null
+  status: $Enums.CommentStatus | null
   reply: string | null
   repliedAt: Date | null
+  replyType: string | null
+  brandVoiceId: string | null
+  modelUsed: string | null
   createdAt: Date | null
 }
 
@@ -72,6 +78,9 @@ export type CommentCountAggregateOutputType = {
   status: number
   reply: number
   repliedAt: number
+  replyType: number
+  brandVoiceId: number
+  modelUsed: number
   createdAt: number
   _all: number
 }
@@ -91,6 +100,9 @@ export type CommentMinAggregateInputType = {
   status?: true
   reply?: true
   repliedAt?: true
+  replyType?: true
+  brandVoiceId?: true
+  modelUsed?: true
   createdAt?: true
 }
 
@@ -108,6 +120,9 @@ export type CommentMaxAggregateInputType = {
   status?: true
   reply?: true
   repliedAt?: true
+  replyType?: true
+  brandVoiceId?: true
+  modelUsed?: true
   createdAt?: true
 }
 
@@ -125,6 +140,9 @@ export type CommentCountAggregateInputType = {
   status?: true
   reply?: true
   repliedAt?: true
+  replyType?: true
+  brandVoiceId?: true
+  modelUsed?: true
   createdAt?: true
   _all?: true
 }
@@ -212,9 +230,12 @@ export type CommentGroupByOutputType = {
   authorName: string
   authorId: string
   content: string
-  status: string
+  status: $Enums.CommentStatus
   reply: string | null
   repliedAt: Date | null
+  replyType: string | null
+  brandVoiceId: string | null
+  modelUsed: string | null
   createdAt: Date
   _count: CommentCountAggregateOutputType | null
   _min: CommentMinAggregateOutputType | null
@@ -250,9 +271,12 @@ export type CommentWhereInput = {
   authorName?: Prisma.StringFilter<"Comment"> | string
   authorId?: Prisma.StringFilter<"Comment"> | string
   content?: Prisma.StringFilter<"Comment"> | string
-  status?: Prisma.StringFilter<"Comment"> | string
+  status?: Prisma.EnumCommentStatusFilter<"Comment"> | $Enums.CommentStatus
   reply?: Prisma.StringNullableFilter<"Comment"> | string | null
   repliedAt?: Prisma.DateTimeNullableFilter<"Comment"> | Date | string | null
+  replyType?: Prisma.StringNullableFilter<"Comment"> | string | null
+  brandVoiceId?: Prisma.StringNullableFilter<"Comment"> | string | null
+  modelUsed?: Prisma.StringNullableFilter<"Comment"> | string | null
   createdAt?: Prisma.DateTimeFilter<"Comment"> | Date | string
   user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
   tenant?: Prisma.XOR<Prisma.TenantScalarRelationFilter, Prisma.TenantWhereInput>
@@ -275,6 +299,9 @@ export type CommentOrderByWithRelationInput = {
   status?: Prisma.SortOrder
   reply?: Prisma.SortOrderInput | Prisma.SortOrder
   repliedAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  replyType?: Prisma.SortOrderInput | Prisma.SortOrder
+  brandVoiceId?: Prisma.SortOrderInput | Prisma.SortOrder
+  modelUsed?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   user?: Prisma.UserOrderByWithRelationInput
   tenant?: Prisma.TenantOrderByWithRelationInput
@@ -297,9 +324,12 @@ export type CommentWhereUniqueInput = Prisma.AtLeast<{
   authorName?: Prisma.StringFilter<"Comment"> | string
   authorId?: Prisma.StringFilter<"Comment"> | string
   content?: Prisma.StringFilter<"Comment"> | string
-  status?: Prisma.StringFilter<"Comment"> | string
+  status?: Prisma.EnumCommentStatusFilter<"Comment"> | $Enums.CommentStatus
   reply?: Prisma.StringNullableFilter<"Comment"> | string | null
   repliedAt?: Prisma.DateTimeNullableFilter<"Comment"> | Date | string | null
+  replyType?: Prisma.StringNullableFilter<"Comment"> | string | null
+  brandVoiceId?: Prisma.StringNullableFilter<"Comment"> | string | null
+  modelUsed?: Prisma.StringNullableFilter<"Comment"> | string | null
   createdAt?: Prisma.DateTimeFilter<"Comment"> | Date | string
   user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
   tenant?: Prisma.XOR<Prisma.TenantScalarRelationFilter, Prisma.TenantWhereInput>
@@ -322,6 +352,9 @@ export type CommentOrderByWithAggregationInput = {
   status?: Prisma.SortOrder
   reply?: Prisma.SortOrderInput | Prisma.SortOrder
   repliedAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  replyType?: Prisma.SortOrderInput | Prisma.SortOrder
+  brandVoiceId?: Prisma.SortOrderInput | Prisma.SortOrder
+  modelUsed?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   _count?: Prisma.CommentCountOrderByAggregateInput
   _max?: Prisma.CommentMaxOrderByAggregateInput
@@ -342,9 +375,12 @@ export type CommentScalarWhereWithAggregatesInput = {
   authorName?: Prisma.StringWithAggregatesFilter<"Comment"> | string
   authorId?: Prisma.StringWithAggregatesFilter<"Comment"> | string
   content?: Prisma.StringWithAggregatesFilter<"Comment"> | string
-  status?: Prisma.StringWithAggregatesFilter<"Comment"> | string
+  status?: Prisma.EnumCommentStatusWithAggregatesFilter<"Comment"> | $Enums.CommentStatus
   reply?: Prisma.StringNullableWithAggregatesFilter<"Comment"> | string | null
   repliedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Comment"> | Date | string | null
+  replyType?: Prisma.StringNullableWithAggregatesFilter<"Comment"> | string | null
+  brandVoiceId?: Prisma.StringNullableWithAggregatesFilter<"Comment"> | string | null
+  modelUsed?: Prisma.StringNullableWithAggregatesFilter<"Comment"> | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Comment"> | Date | string
 }
 
@@ -354,9 +390,12 @@ export type CommentCreateInput = {
   authorName: string
   authorId: string
   content: string
-  status?: string
+  status?: $Enums.CommentStatus
   reply?: string | null
   repliedAt?: Date | string | null
+  replyType?: string | null
+  brandVoiceId?: string | null
+  modelUsed?: string | null
   createdAt?: Date | string
   user: Prisma.UserCreateNestedOneWithoutCommentsInput
   tenant: Prisma.TenantCreateNestedOneWithoutCommentsInput
@@ -376,9 +415,12 @@ export type CommentUncheckedCreateInput = {
   authorName: string
   authorId: string
   content: string
-  status?: string
+  status?: $Enums.CommentStatus
   reply?: string | null
   repliedAt?: Date | string | null
+  replyType?: string | null
+  brandVoiceId?: string | null
+  modelUsed?: string | null
   createdAt?: Date | string
 }
 
@@ -388,9 +430,12 @@ export type CommentUpdateInput = {
   authorName?: Prisma.StringFieldUpdateOperationsInput | string
   authorId?: Prisma.StringFieldUpdateOperationsInput | string
   content?: Prisma.StringFieldUpdateOperationsInput | string
-  status?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumCommentStatusFieldUpdateOperationsInput | $Enums.CommentStatus
   reply?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   repliedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  replyType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  brandVoiceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  modelUsed?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   user?: Prisma.UserUpdateOneRequiredWithoutCommentsNestedInput
   tenant?: Prisma.TenantUpdateOneRequiredWithoutCommentsNestedInput
@@ -410,9 +455,12 @@ export type CommentUncheckedUpdateInput = {
   authorName?: Prisma.StringFieldUpdateOperationsInput | string
   authorId?: Prisma.StringFieldUpdateOperationsInput | string
   content?: Prisma.StringFieldUpdateOperationsInput | string
-  status?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumCommentStatusFieldUpdateOperationsInput | $Enums.CommentStatus
   reply?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   repliedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  replyType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  brandVoiceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  modelUsed?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -427,9 +475,12 @@ export type CommentCreateManyInput = {
   authorName: string
   authorId: string
   content: string
-  status?: string
+  status?: $Enums.CommentStatus
   reply?: string | null
   repliedAt?: Date | string | null
+  replyType?: string | null
+  brandVoiceId?: string | null
+  modelUsed?: string | null
   createdAt?: Date | string
 }
 
@@ -439,9 +490,12 @@ export type CommentUpdateManyMutationInput = {
   authorName?: Prisma.StringFieldUpdateOperationsInput | string
   authorId?: Prisma.StringFieldUpdateOperationsInput | string
   content?: Prisma.StringFieldUpdateOperationsInput | string
-  status?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumCommentStatusFieldUpdateOperationsInput | $Enums.CommentStatus
   reply?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   repliedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  replyType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  brandVoiceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  modelUsed?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -456,9 +510,12 @@ export type CommentUncheckedUpdateManyInput = {
   authorName?: Prisma.StringFieldUpdateOperationsInput | string
   authorId?: Prisma.StringFieldUpdateOperationsInput | string
   content?: Prisma.StringFieldUpdateOperationsInput | string
-  status?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumCommentStatusFieldUpdateOperationsInput | $Enums.CommentStatus
   reply?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   repliedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  replyType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  brandVoiceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  modelUsed?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -486,6 +543,9 @@ export type CommentCountOrderByAggregateInput = {
   status?: Prisma.SortOrder
   reply?: Prisma.SortOrder
   repliedAt?: Prisma.SortOrder
+  replyType?: Prisma.SortOrder
+  brandVoiceId?: Prisma.SortOrder
+  modelUsed?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
 }
 
@@ -503,6 +563,9 @@ export type CommentMaxOrderByAggregateInput = {
   status?: Prisma.SortOrder
   reply?: Prisma.SortOrder
   repliedAt?: Prisma.SortOrder
+  replyType?: Prisma.SortOrder
+  brandVoiceId?: Prisma.SortOrder
+  modelUsed?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
 }
 
@@ -520,6 +583,9 @@ export type CommentMinOrderByAggregateInput = {
   status?: Prisma.SortOrder
   reply?: Prisma.SortOrder
   repliedAt?: Prisma.SortOrder
+  replyType?: Prisma.SortOrder
+  brandVoiceId?: Prisma.SortOrder
+  modelUsed?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
 }
 
@@ -691,6 +757,10 @@ export type CommentUncheckedUpdateManyWithoutPostNestedInput = {
   deleteMany?: Prisma.CommentScalarWhereInput | Prisma.CommentScalarWhereInput[]
 }
 
+export type EnumCommentStatusFieldUpdateOperationsInput = {
+  set?: $Enums.CommentStatus
+}
+
 export type CommentCreateNestedManyWithoutRuleInput = {
   create?: Prisma.XOR<Prisma.CommentCreateWithoutRuleInput, Prisma.CommentUncheckedCreateWithoutRuleInput> | Prisma.CommentCreateWithoutRuleInput[] | Prisma.CommentUncheckedCreateWithoutRuleInput[]
   connectOrCreate?: Prisma.CommentCreateOrConnectWithoutRuleInput | Prisma.CommentCreateOrConnectWithoutRuleInput[]
@@ -739,9 +809,12 @@ export type CommentCreateWithoutTenantInput = {
   authorName: string
   authorId: string
   content: string
-  status?: string
+  status?: $Enums.CommentStatus
   reply?: string | null
   repliedAt?: Date | string | null
+  replyType?: string | null
+  brandVoiceId?: string | null
+  modelUsed?: string | null
   createdAt?: Date | string
   user: Prisma.UserCreateNestedOneWithoutCommentsInput
   page: Prisma.FacebookPageCreateNestedOneWithoutCommentsInput
@@ -759,9 +832,12 @@ export type CommentUncheckedCreateWithoutTenantInput = {
   authorName: string
   authorId: string
   content: string
-  status?: string
+  status?: $Enums.CommentStatus
   reply?: string | null
   repliedAt?: Date | string | null
+  replyType?: string | null
+  brandVoiceId?: string | null
+  modelUsed?: string | null
   createdAt?: Date | string
 }
 
@@ -805,9 +881,12 @@ export type CommentScalarWhereInput = {
   authorName?: Prisma.StringFilter<"Comment"> | string
   authorId?: Prisma.StringFilter<"Comment"> | string
   content?: Prisma.StringFilter<"Comment"> | string
-  status?: Prisma.StringFilter<"Comment"> | string
+  status?: Prisma.EnumCommentStatusFilter<"Comment"> | $Enums.CommentStatus
   reply?: Prisma.StringNullableFilter<"Comment"> | string | null
   repliedAt?: Prisma.DateTimeNullableFilter<"Comment"> | Date | string | null
+  replyType?: Prisma.StringNullableFilter<"Comment"> | string | null
+  brandVoiceId?: Prisma.StringNullableFilter<"Comment"> | string | null
+  modelUsed?: Prisma.StringNullableFilter<"Comment"> | string | null
   createdAt?: Prisma.DateTimeFilter<"Comment"> | Date | string
 }
 
@@ -817,9 +896,12 @@ export type CommentCreateWithoutUserInput = {
   authorName: string
   authorId: string
   content: string
-  status?: string
+  status?: $Enums.CommentStatus
   reply?: string | null
   repliedAt?: Date | string | null
+  replyType?: string | null
+  brandVoiceId?: string | null
+  modelUsed?: string | null
   createdAt?: Date | string
   tenant: Prisma.TenantCreateNestedOneWithoutCommentsInput
   page: Prisma.FacebookPageCreateNestedOneWithoutCommentsInput
@@ -837,9 +919,12 @@ export type CommentUncheckedCreateWithoutUserInput = {
   authorName: string
   authorId: string
   content: string
-  status?: string
+  status?: $Enums.CommentStatus
   reply?: string | null
   repliedAt?: Date | string | null
+  replyType?: string | null
+  brandVoiceId?: string | null
+  modelUsed?: string | null
   createdAt?: Date | string
 }
 
@@ -875,9 +960,12 @@ export type CommentCreateWithoutPageInput = {
   authorName: string
   authorId: string
   content: string
-  status?: string
+  status?: $Enums.CommentStatus
   reply?: string | null
   repliedAt?: Date | string | null
+  replyType?: string | null
+  brandVoiceId?: string | null
+  modelUsed?: string | null
   createdAt?: Date | string
   user: Prisma.UserCreateNestedOneWithoutCommentsInput
   tenant: Prisma.TenantCreateNestedOneWithoutCommentsInput
@@ -895,9 +983,12 @@ export type CommentUncheckedCreateWithoutPageInput = {
   authorName: string
   authorId: string
   content: string
-  status?: string
+  status?: $Enums.CommentStatus
   reply?: string | null
   repliedAt?: Date | string | null
+  replyType?: string | null
+  brandVoiceId?: string | null
+  modelUsed?: string | null
   createdAt?: Date | string
 }
 
@@ -933,9 +1024,12 @@ export type CommentCreateWithoutPostInput = {
   authorName: string
   authorId: string
   content: string
-  status?: string
+  status?: $Enums.CommentStatus
   reply?: string | null
   repliedAt?: Date | string | null
+  replyType?: string | null
+  brandVoiceId?: string | null
+  modelUsed?: string | null
   createdAt?: Date | string
   user: Prisma.UserCreateNestedOneWithoutCommentsInput
   tenant: Prisma.TenantCreateNestedOneWithoutCommentsInput
@@ -953,9 +1047,12 @@ export type CommentUncheckedCreateWithoutPostInput = {
   authorName: string
   authorId: string
   content: string
-  status?: string
+  status?: $Enums.CommentStatus
   reply?: string | null
   repliedAt?: Date | string | null
+  replyType?: string | null
+  brandVoiceId?: string | null
+  modelUsed?: string | null
   createdAt?: Date | string
 }
 
@@ -991,9 +1088,12 @@ export type CommentCreateWithoutRuleInput = {
   authorName: string
   authorId: string
   content: string
-  status?: string
+  status?: $Enums.CommentStatus
   reply?: string | null
   repliedAt?: Date | string | null
+  replyType?: string | null
+  brandVoiceId?: string | null
+  modelUsed?: string | null
   createdAt?: Date | string
   user: Prisma.UserCreateNestedOneWithoutCommentsInput
   tenant: Prisma.TenantCreateNestedOneWithoutCommentsInput
@@ -1011,9 +1111,12 @@ export type CommentUncheckedCreateWithoutRuleInput = {
   authorName: string
   authorId: string
   content: string
-  status?: string
+  status?: $Enums.CommentStatus
   reply?: string | null
   repliedAt?: Date | string | null
+  replyType?: string | null
+  brandVoiceId?: string | null
+  modelUsed?: string | null
   createdAt?: Date | string
 }
 
@@ -1053,9 +1156,12 @@ export type CommentCreateManyTenantInput = {
   authorName: string
   authorId: string
   content: string
-  status?: string
+  status?: $Enums.CommentStatus
   reply?: string | null
   repliedAt?: Date | string | null
+  replyType?: string | null
+  brandVoiceId?: string | null
+  modelUsed?: string | null
   createdAt?: Date | string
 }
 
@@ -1065,9 +1171,12 @@ export type CommentUpdateWithoutTenantInput = {
   authorName?: Prisma.StringFieldUpdateOperationsInput | string
   authorId?: Prisma.StringFieldUpdateOperationsInput | string
   content?: Prisma.StringFieldUpdateOperationsInput | string
-  status?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumCommentStatusFieldUpdateOperationsInput | $Enums.CommentStatus
   reply?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   repliedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  replyType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  brandVoiceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  modelUsed?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   user?: Prisma.UserUpdateOneRequiredWithoutCommentsNestedInput
   page?: Prisma.FacebookPageUpdateOneRequiredWithoutCommentsNestedInput
@@ -1085,9 +1194,12 @@ export type CommentUncheckedUpdateWithoutTenantInput = {
   authorName?: Prisma.StringFieldUpdateOperationsInput | string
   authorId?: Prisma.StringFieldUpdateOperationsInput | string
   content?: Prisma.StringFieldUpdateOperationsInput | string
-  status?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumCommentStatusFieldUpdateOperationsInput | $Enums.CommentStatus
   reply?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   repliedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  replyType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  brandVoiceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  modelUsed?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -1101,9 +1213,12 @@ export type CommentUncheckedUpdateManyWithoutTenantInput = {
   authorName?: Prisma.StringFieldUpdateOperationsInput | string
   authorId?: Prisma.StringFieldUpdateOperationsInput | string
   content?: Prisma.StringFieldUpdateOperationsInput | string
-  status?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumCommentStatusFieldUpdateOperationsInput | $Enums.CommentStatus
   reply?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   repliedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  replyType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  brandVoiceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  modelUsed?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -1117,9 +1232,12 @@ export type CommentCreateManyUserInput = {
   authorName: string
   authorId: string
   content: string
-  status?: string
+  status?: $Enums.CommentStatus
   reply?: string | null
   repliedAt?: Date | string | null
+  replyType?: string | null
+  brandVoiceId?: string | null
+  modelUsed?: string | null
   createdAt?: Date | string
 }
 
@@ -1129,9 +1247,12 @@ export type CommentUpdateWithoutUserInput = {
   authorName?: Prisma.StringFieldUpdateOperationsInput | string
   authorId?: Prisma.StringFieldUpdateOperationsInput | string
   content?: Prisma.StringFieldUpdateOperationsInput | string
-  status?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumCommentStatusFieldUpdateOperationsInput | $Enums.CommentStatus
   reply?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   repliedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  replyType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  brandVoiceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  modelUsed?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   tenant?: Prisma.TenantUpdateOneRequiredWithoutCommentsNestedInput
   page?: Prisma.FacebookPageUpdateOneRequiredWithoutCommentsNestedInput
@@ -1149,9 +1270,12 @@ export type CommentUncheckedUpdateWithoutUserInput = {
   authorName?: Prisma.StringFieldUpdateOperationsInput | string
   authorId?: Prisma.StringFieldUpdateOperationsInput | string
   content?: Prisma.StringFieldUpdateOperationsInput | string
-  status?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumCommentStatusFieldUpdateOperationsInput | $Enums.CommentStatus
   reply?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   repliedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  replyType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  brandVoiceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  modelUsed?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -1165,9 +1289,12 @@ export type CommentUncheckedUpdateManyWithoutUserInput = {
   authorName?: Prisma.StringFieldUpdateOperationsInput | string
   authorId?: Prisma.StringFieldUpdateOperationsInput | string
   content?: Prisma.StringFieldUpdateOperationsInput | string
-  status?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumCommentStatusFieldUpdateOperationsInput | $Enums.CommentStatus
   reply?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   repliedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  replyType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  brandVoiceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  modelUsed?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -1181,9 +1308,12 @@ export type CommentCreateManyPageInput = {
   authorName: string
   authorId: string
   content: string
-  status?: string
+  status?: $Enums.CommentStatus
   reply?: string | null
   repliedAt?: Date | string | null
+  replyType?: string | null
+  brandVoiceId?: string | null
+  modelUsed?: string | null
   createdAt?: Date | string
 }
 
@@ -1193,9 +1323,12 @@ export type CommentUpdateWithoutPageInput = {
   authorName?: Prisma.StringFieldUpdateOperationsInput | string
   authorId?: Prisma.StringFieldUpdateOperationsInput | string
   content?: Prisma.StringFieldUpdateOperationsInput | string
-  status?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumCommentStatusFieldUpdateOperationsInput | $Enums.CommentStatus
   reply?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   repliedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  replyType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  brandVoiceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  modelUsed?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   user?: Prisma.UserUpdateOneRequiredWithoutCommentsNestedInput
   tenant?: Prisma.TenantUpdateOneRequiredWithoutCommentsNestedInput
@@ -1213,9 +1346,12 @@ export type CommentUncheckedUpdateWithoutPageInput = {
   authorName?: Prisma.StringFieldUpdateOperationsInput | string
   authorId?: Prisma.StringFieldUpdateOperationsInput | string
   content?: Prisma.StringFieldUpdateOperationsInput | string
-  status?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumCommentStatusFieldUpdateOperationsInput | $Enums.CommentStatus
   reply?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   repliedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  replyType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  brandVoiceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  modelUsed?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -1229,9 +1365,12 @@ export type CommentUncheckedUpdateManyWithoutPageInput = {
   authorName?: Prisma.StringFieldUpdateOperationsInput | string
   authorId?: Prisma.StringFieldUpdateOperationsInput | string
   content?: Prisma.StringFieldUpdateOperationsInput | string
-  status?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumCommentStatusFieldUpdateOperationsInput | $Enums.CommentStatus
   reply?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   repliedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  replyType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  brandVoiceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  modelUsed?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -1245,9 +1384,12 @@ export type CommentCreateManyPostInput = {
   authorName: string
   authorId: string
   content: string
-  status?: string
+  status?: $Enums.CommentStatus
   reply?: string | null
   repliedAt?: Date | string | null
+  replyType?: string | null
+  brandVoiceId?: string | null
+  modelUsed?: string | null
   createdAt?: Date | string
 }
 
@@ -1257,9 +1399,12 @@ export type CommentUpdateWithoutPostInput = {
   authorName?: Prisma.StringFieldUpdateOperationsInput | string
   authorId?: Prisma.StringFieldUpdateOperationsInput | string
   content?: Prisma.StringFieldUpdateOperationsInput | string
-  status?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumCommentStatusFieldUpdateOperationsInput | $Enums.CommentStatus
   reply?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   repliedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  replyType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  brandVoiceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  modelUsed?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   user?: Prisma.UserUpdateOneRequiredWithoutCommentsNestedInput
   tenant?: Prisma.TenantUpdateOneRequiredWithoutCommentsNestedInput
@@ -1277,9 +1422,12 @@ export type CommentUncheckedUpdateWithoutPostInput = {
   authorName?: Prisma.StringFieldUpdateOperationsInput | string
   authorId?: Prisma.StringFieldUpdateOperationsInput | string
   content?: Prisma.StringFieldUpdateOperationsInput | string
-  status?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumCommentStatusFieldUpdateOperationsInput | $Enums.CommentStatus
   reply?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   repliedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  replyType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  brandVoiceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  modelUsed?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -1293,9 +1441,12 @@ export type CommentUncheckedUpdateManyWithoutPostInput = {
   authorName?: Prisma.StringFieldUpdateOperationsInput | string
   authorId?: Prisma.StringFieldUpdateOperationsInput | string
   content?: Prisma.StringFieldUpdateOperationsInput | string
-  status?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumCommentStatusFieldUpdateOperationsInput | $Enums.CommentStatus
   reply?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   repliedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  replyType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  brandVoiceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  modelUsed?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -1309,9 +1460,12 @@ export type CommentCreateManyRuleInput = {
   authorName: string
   authorId: string
   content: string
-  status?: string
+  status?: $Enums.CommentStatus
   reply?: string | null
   repliedAt?: Date | string | null
+  replyType?: string | null
+  brandVoiceId?: string | null
+  modelUsed?: string | null
   createdAt?: Date | string
 }
 
@@ -1321,9 +1475,12 @@ export type CommentUpdateWithoutRuleInput = {
   authorName?: Prisma.StringFieldUpdateOperationsInput | string
   authorId?: Prisma.StringFieldUpdateOperationsInput | string
   content?: Prisma.StringFieldUpdateOperationsInput | string
-  status?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumCommentStatusFieldUpdateOperationsInput | $Enums.CommentStatus
   reply?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   repliedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  replyType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  brandVoiceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  modelUsed?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   user?: Prisma.UserUpdateOneRequiredWithoutCommentsNestedInput
   tenant?: Prisma.TenantUpdateOneRequiredWithoutCommentsNestedInput
@@ -1341,9 +1498,12 @@ export type CommentUncheckedUpdateWithoutRuleInput = {
   authorName?: Prisma.StringFieldUpdateOperationsInput | string
   authorId?: Prisma.StringFieldUpdateOperationsInput | string
   content?: Prisma.StringFieldUpdateOperationsInput | string
-  status?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumCommentStatusFieldUpdateOperationsInput | $Enums.CommentStatus
   reply?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   repliedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  replyType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  brandVoiceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  modelUsed?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -1357,9 +1517,12 @@ export type CommentUncheckedUpdateManyWithoutRuleInput = {
   authorName?: Prisma.StringFieldUpdateOperationsInput | string
   authorId?: Prisma.StringFieldUpdateOperationsInput | string
   content?: Prisma.StringFieldUpdateOperationsInput | string
-  status?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumCommentStatusFieldUpdateOperationsInput | $Enums.CommentStatus
   reply?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   repliedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  replyType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  brandVoiceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  modelUsed?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -1379,6 +1542,9 @@ export type CommentSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs 
   status?: boolean
   reply?: boolean
   repliedAt?: boolean
+  replyType?: boolean
+  brandVoiceId?: boolean
+  modelUsed?: boolean
   createdAt?: boolean
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   tenant?: boolean | Prisma.TenantDefaultArgs<ExtArgs>
@@ -1401,6 +1567,9 @@ export type CommentSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Exten
   status?: boolean
   reply?: boolean
   repliedAt?: boolean
+  replyType?: boolean
+  brandVoiceId?: boolean
+  modelUsed?: boolean
   createdAt?: boolean
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   tenant?: boolean | Prisma.TenantDefaultArgs<ExtArgs>
@@ -1423,6 +1592,9 @@ export type CommentSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Exten
   status?: boolean
   reply?: boolean
   repliedAt?: boolean
+  replyType?: boolean
+  brandVoiceId?: boolean
+  modelUsed?: boolean
   createdAt?: boolean
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   tenant?: boolean | Prisma.TenantDefaultArgs<ExtArgs>
@@ -1445,10 +1617,13 @@ export type CommentSelectScalar = {
   status?: boolean
   reply?: boolean
   repliedAt?: boolean
+  replyType?: boolean
+  brandVoiceId?: boolean
+  modelUsed?: boolean
   createdAt?: boolean
 }
 
-export type CommentOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "tenantId" | "pageId" | "postId" | "ruleId" | "facebookCommentId" | "authorName" | "authorId" | "content" | "status" | "reply" | "repliedAt" | "createdAt", ExtArgs["result"]["comment"]>
+export type CommentOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "tenantId" | "pageId" | "postId" | "ruleId" | "facebookCommentId" | "authorName" | "authorId" | "content" | "status" | "reply" | "repliedAt" | "replyType" | "brandVoiceId" | "modelUsed" | "createdAt", ExtArgs["result"]["comment"]>
 export type CommentInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   tenant?: boolean | Prisma.TenantDefaultArgs<ExtArgs>
@@ -1491,9 +1666,12 @@ export type $CommentPayload<ExtArgs extends runtime.Types.Extensions.InternalArg
     authorName: string
     authorId: string
     content: string
-    status: string
+    status: $Enums.CommentStatus
     reply: string | null
     repliedAt: Date | null
+    replyType: string | null
+    brandVoiceId: string | null
+    modelUsed: string | null
     createdAt: Date
   }, ExtArgs["result"]["comment"]>
   composites: {}
@@ -1933,9 +2111,12 @@ export interface CommentFieldRefs {
   readonly authorName: Prisma.FieldRef<"Comment", 'String'>
   readonly authorId: Prisma.FieldRef<"Comment", 'String'>
   readonly content: Prisma.FieldRef<"Comment", 'String'>
-  readonly status: Prisma.FieldRef<"Comment", 'String'>
+  readonly status: Prisma.FieldRef<"Comment", 'CommentStatus'>
   readonly reply: Prisma.FieldRef<"Comment", 'String'>
   readonly repliedAt: Prisma.FieldRef<"Comment", 'DateTime'>
+  readonly replyType: Prisma.FieldRef<"Comment", 'String'>
+  readonly brandVoiceId: Prisma.FieldRef<"Comment", 'String'>
+  readonly modelUsed: Prisma.FieldRef<"Comment", 'String'>
   readonly createdAt: Prisma.FieldRef<"Comment", 'DateTime'>
 }
     

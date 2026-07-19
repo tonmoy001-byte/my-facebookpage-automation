@@ -1,21 +1,43 @@
 // @ts-nocheck
 import { NextResponse } from 'next/server';
 import { getCurrentUser } from '@/lib/auth';
-import { generateCaption } from '@/lib/ai';
+import { generateCaption } from '@/lib/ai/caption';
+import { checkRateLimit } from '@/lib/rate-limit';
 
 export async function POST(request: Request) {
   try {
     const user = await getCurrentUser(request);
     if (!user) {
-      return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
+      return NextResponse.json(
+        { success: false, error: { code: 'UNAUTHORIZED', message: 'Not authenticated' } },
+        { status: 401 }
+      );
     }
 
-    const { imageUrl, description, brandVoice, hashtags, maxHashtags, tone, maxLength } =
+    // Rate limit: 10 requests per minute per tenant
+    const rateLimitKey = `ai-caption:${user.tenantId}`;
+    const allowed = checkRateLimit(rateLimitKey, 10, 60000);
+    if (!allowed) {
+      return NextResponse.json(
+        { success: false, error: { code: 'RATE_LIMITED', message: 'Too many requests. Try again in a minute.' } },
+        { status: 429 }
+      );
+    }
+
+    const { imageUrl, description, language, tone, brandVoiceId, includeHashtags, maxHashtags } =
       await request.json();
 
     if (!description) {
       return NextResponse.json(
-        { error: 'Description is required' },
+        { success: false, error: { code: 'VALIDATION_ERROR', message: 'Description is required' } },
+        { status: 400 }
+      );
+    }
+
+    // Validate language enum
+    if (language && !['EN', 'BN'].includes(language)) {
+      return NextResponse.json(
+        { success: false, error: { code: 'VALIDATION_ERROR', message: 'Language must be EN or BN' } },
         { status: 400 }
       );
     }
@@ -24,18 +46,24 @@ export async function POST(request: Request) {
       tenantId: user.tenantId,
       imageUrl,
       description,
-      brandVoice,
-      hashtags,
-      maxHashtags,
-      tone,
-      maxLength,
+      language: language || 'EN',
+      brandVoiceId,
+      includeHashtags: includeHashtags !== false,
+      maxHashtags: maxHashtags || 5,
     });
 
-    return NextResponse.json(result);
+    return NextResponse.json({
+      success: true,
+      data: {
+        ...result,
+        language: language || 'EN',
+        tone: tone || 'professional',
+      },
+    });
   } catch (error: any) {
     console.error('Caption generation error:', error);
     return NextResponse.json(
-      { error: error.message || 'Failed to generate caption' },
+      { success: false, error: { code: 'AI_ERROR', message: error.message || 'Failed to generate caption' } },
       { status: 500 }
     );
   }

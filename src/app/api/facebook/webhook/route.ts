@@ -82,16 +82,59 @@ async function handleNewComment(value: any, page: any) {
 
   if (!from?.id || !message) return;
 
-  // Try to find the post in our database
+  // Idempotency: check if comment already processed
+  const existingComment = await prisma.comment.findUnique({
+    where: { facebookCommentId: comment_id },
+  });
+  if (existingComment) {
+    console.log(`Comment ${comment_id} already processed, skipping`);
+    return;
+  }
+
+  // Find the post in our database
   let postId = null;
+  let post = null;
   if (post_id) {
-    const post = await prisma.post.findFirst({
+    post = await prisma.post.findFirst({
       where: { facebookPostId: post_id },
     });
     if (post) postId = post.id;
   }
 
-  // Check for matching reply rules for this tenant (priority order)
+  // Create comment record immediately with PROCESSING status
+  const comment = await prisma.comment.create({
+    data: {
+      userId: page.userId,
+      pageId: page.id,
+      tenantId: page.tenantId,
+      postId,
+      facebookCommentId: comment_id,
+      authorName: from.name || 'Unknown',
+      authorId: from.id,
+      content: message,
+      status: 'PROCESSING',
+    },
+  });
+
+  // Early exit: no post found
+  if (!post) {
+    await prisma.comment.update({
+      where: { id: comment.id },
+      data: { status: 'PENDING' },
+    });
+    return;
+  }
+
+  // Early exit: auto-reply not enabled on this post
+  if (!post.autoReply) {
+    await prisma.comment.update({
+      where: { id: comment.id },
+      data: { status: 'PENDING' },
+    });
+    return;
+  }
+
+  // Find matching reply rules (priority order)
   const rules = await prisma.replyRule.findMany({
     where: {
       tenantId: page.tenantId,
@@ -107,51 +150,117 @@ async function handleNewComment(value: any, page: any) {
     if (shouldReply(rule, message)) {
       matchedRule = rule;
 
-      // Handle different action types
       if (rule.action === 'escalate') {
-        // Escalate: store comment but do NOT auto-reply
+        // Escalate: store but do NOT reply
         replyText = null;
       } else if (rule.action === 'ai_reply') {
-        // AI reply: generate using AI with brand voice from rule
+        // AI reply: generate using AI with language detection
         try {
-          const { generateReply } = await import('@/lib/ai');
-          replyText = await generateReply(message, 'professional');
+          const { generateReply } = await import('@/lib/ai/reply');
+          const result = await generateReply({
+            comment: message,
+            postContent: post.content,
+            brandVoiceId: rule.brandVoiceId,
+            tenantId: page.tenantId,
+            pageName: page.pageName,
+          });
+          replyText = result.reply;
+
+          // Update comment with AI metadata
+          await prisma.comment.update({
+            where: { id: comment.id },
+            data: {
+              replyType: 'AI',
+              brandVoiceId: result.brandVoiceId,
+              modelUsed: result.modelUsed,
+            },
+          });
         } catch (aiError) {
           console.error('AI reply generation failed, falling back to template:', aiError);
           replyText = rule.replyTemplate || null;
+          if (replyText) {
+            await prisma.comment.update({
+              where: { id: comment.id },
+              data: { replyType: 'TEMPLATE' },
+            });
+          }
         }
       } else {
-        // Template reply (default): use replyTemplate with variable substitution
+        // Template reply (default)
         replyText = rule.replyTemplate || null;
+        if (replyText) {
+          await prisma.comment.update({
+            where: { id: comment.id },
+            data: { replyType: 'TEMPLATE' },
+          });
+        }
       }
 
       // Replace template variables
       if (replyText) {
         replyText = replyText.replace(/{name}/g, from.name || 'there');
         replyText = replyText.replace(/{comment}/g, message);
+        replyText = replyText.replace(/{postTitle}/g, (post.content || '').substring(0, 100));
+        replyText = replyText.replace(/{pageName}/g, page.pageName || 'our page');
       }
       break;
     }
   }
 
-  // Store the comment
-  const comment = await prisma.comment.create({
+  // Update comment with rule match info
+  await prisma.comment.update({
+    where: { id: comment.id },
     data: {
-      userId: page.userId,
-      pageId: page.id,
-      tenantId: page.tenantId,
-      postId,
       ruleId: matchedRule?.id || null,
-      facebookCommentId: comment_id,
-      authorName: from.name || 'Unknown',
-      authorId: from.id,
-      content: message,
-      status: matchedRule ? (replyText ? 'replied' : 'pending') : 'pending',
     },
   });
 
-  // Send the auto-reply if a rule matched and we have reply text (not escalated)
-  if (matchedRule && replyText) {
+  // No rule matched — mark as PENDING
+  if (!matchedRule) {
+    await prisma.comment.update({
+      where: { id: comment.id },
+      data: { status: 'PENDING' },
+    });
+    return;
+  }
+
+  // Escalated — mark as ESCALATED
+  if (matchedRule.action === 'escalate') {
+    await prisma.comment.update({
+      where: { id: comment.id },
+      data: { status: 'ESCALATED' },
+    });
+    return;
+  }
+
+  // No reply text generated — mark as PENDING
+  if (!replyText) {
+    await prisma.comment.update({
+      where: { id: comment.id },
+      data: { status: 'PENDING' },
+    });
+    return;
+  }
+
+  // Send the Facebook reply (with retry)
+  try {
+    const fbService = createFacebookService(page.accessToken, page.pageId);
+    await fbService.replyToComment(comment_id, replyText);
+
+    await prisma.comment.update({
+      where: { id: comment.id },
+      data: {
+        reply: replyText,
+        repliedAt: new Date(),
+        status: 'REPLIED',
+      },
+    });
+
+    console.log(`Auto-replied to comment ${comment_id} using rule ${matchedRule.name} (action: ${matchedRule.action})`);
+  } catch (error) {
+    console.error(`Failed to reply to comment ${comment_id}, retrying once:`, error);
+
+    // Retry once
     try {
       const fbService = createFacebookService(page.accessToken, page.pageId);
       await fbService.replyToComment(comment_id, replyText);
@@ -161,20 +270,16 @@ async function handleNewComment(value: any, page: any) {
         data: {
           reply: replyText,
           repliedAt: new Date(),
-          status: 'replied',
+          status: 'REPLIED',
         },
       });
-
-      console.log(`Auto-replied to comment ${comment_id} using rule ${matchedRule.name} (action: ${matchedRule.action})`);
-    } catch (error) {
-      console.error(`Failed to reply to comment ${comment_id}:`, error);
+    } catch (retryError) {
+      console.error(`Retry failed for comment ${comment_id}:`, retryError);
       await prisma.comment.update({
         where: { id: comment.id },
-        data: { status: 'pending' },
+        data: { status: 'FAILED' },
       });
     }
-  } else if (matchedRule && matchedRule.action === 'escalate') {
-    console.log(`Comment ${comment_id} escalated (rule: ${matchedRule.name}), no auto-reply sent`);
   }
 }
 

@@ -27,6 +27,10 @@ export default function CreatePostPage() {
   const [generating, setGenerating] = useState(false);
   const [saving, setSaving] = useState(false);
   const [scheduledAt, setScheduledAt] = useState('');
+  const [language, setLanguage] = useState<'EN' | 'BN'>('EN');
+  const [tone, setTone] = useState('professional');
+  const [autoReply, setAutoReply] = useState(false);
+  const [analyzing, setAnalyzing] = useState(false);
   const { token } = useAuth();
 
   useEffect(() => {
@@ -61,9 +65,10 @@ export default function CreatePostPage() {
         body: JSON.stringify({
           imageUrl,
           description,
-          brandVoice: selectedVoice || 'professional',
-          hashtags: true,
-          maxHashtags: 5,
+          language,
+          tone,
+          brandVoiceId: selectedVoice || null,
+          includeHashtags: true,
         }),
       });
 
@@ -72,12 +77,32 @@ export default function CreatePostPage() {
       }
 
       const data = await response.json();
-      setCaption(data.caption);
-      setHashtags(data.hashtags);
+      setCaption(data.caption || data.data?.caption || '');
+      setHashtags(data.hashtags || data.data?.hashtags || []);
     } catch (error: any) {
       alert(error.message || 'Failed to generate caption');
     } finally {
       setGenerating(false);
+    }
+  };
+
+  const handleAnalyzeImage = async () => {
+    if (!imageUrl) return;
+    setAnalyzing(true);
+    try {
+      const response = await fetch('/api/ai/image/analyze', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) },
+        body: JSON.stringify({ imageUrl }),
+      });
+      if (!response.ok) throw new Error('Failed to analyze image');
+      const data = await response.json();
+      const result = data.data || data;
+      setDescription(result.description || '');
+    } catch (error: any) {
+      alert(error.message || 'Failed to analyze image');
+    } finally {
+      setAnalyzing(false);
     }
   };
 
@@ -115,6 +140,8 @@ export default function CreatePostPage() {
           imageUrl,
           brandVoiceId: selectedVoice || null,
           scheduledAt: isoScheduledAt,
+          language,
+          autoReply,
         }),
       });
 
@@ -175,6 +202,13 @@ export default function CreatePostPage() {
                 <p className="mt-2 text-sm text-green-600 flex items-center gap-1">
                   <span className="inline-block w-2 h-2 rounded-full bg-green-500"></span>
                   Image attached
+                  <button
+                    onClick={handleAnalyzeImage}
+                    disabled={analyzing}
+                    className="ml-2 text-blue-600 hover:text-blue-800 underline"
+                  >
+                    {analyzing ? 'Analyzing...' : 'Analyze image'}
+                  </button>
                 </p>
               ) : (
                 <p className="mt-2 text-sm text-gray-400 flex items-center gap-1">
@@ -193,6 +227,57 @@ export default function CreatePostPage() {
                 placeholder="Describe your post for AI caption generation..."
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 h-32"
               />
+            </div>
+
+            {/* Language, Tone, Auto-reply */}
+            <div className="bg-white rounded-lg shadow p-6">
+              <h2 className="text-lg font-semibold text-gray-900 mb-4">Post Settings</h2>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Language</label>
+                  <div className="flex rounded-lg border border-gray-300 overflow-hidden">
+                    <button
+                      onClick={() => setLanguage('EN')}
+                      className={`flex-1 py-2 text-sm font-medium ${language === 'EN' ? 'bg-blue-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-50'}`}
+                    >
+                      English
+                    </button>
+                    <button
+                      onClick={() => setLanguage('BN')}
+                      className={`flex-1 py-2 text-sm font-medium ${language === 'BN' ? 'bg-blue-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-50'}`}
+                    >
+                      বাংলা
+                    </button>
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Tone</label>
+                  <select
+                    value={tone}
+                    onChange={(e) => setTone(e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  >
+                    <option value="professional">Professional</option>
+                    <option value="casual">Casual</option>
+                    <option value="funny">Funny</option>
+                    <option value="inspirational">Inspirational</option>
+                    <option value="educational">Educational</option>
+                    <option value="romantic">Romantic</option>
+                    <option value="witty">Witty</option>
+                  </select>
+                </div>
+              </div>
+              <div className="mt-4">
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={autoReply}
+                    onChange={(e) => setAutoReply(e.target.checked)}
+                    className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                  />
+                  <span className="text-sm font-medium text-gray-700">Enable auto-reply for comments on this post</span>
+                </label>
+              </div>
             </div>
 
             {/* Caption */}

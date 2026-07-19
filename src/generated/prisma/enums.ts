@@ -9,7 +9,20 @@
 * 🟢 You can import this file directly.
 */
 
+export const Language = {
+  EN: 'EN',
+  BN: 'BN'
+} as const
+
+export type Language = (typeof Language)[keyof typeof Language]
 
 
-// This file is empty because there are no enums in the schema.
-export {}
+export const CommentStatus = {
+  PROCESSING: 'PROCESSING',
+  REPLIED: 'REPLIED',
+  PENDING: 'PENDING',
+  ESCALATED: 'ESCALATED',
+  FAILED: 'FAILED'
+} as const
+
+export type CommentStatus = (typeof CommentStatus)[keyof typeof CommentStatus]

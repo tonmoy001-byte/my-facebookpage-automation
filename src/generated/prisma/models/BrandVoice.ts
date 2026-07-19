@@ -33,6 +33,7 @@ export type BrandVoiceMinAggregateOutputType = {
   styleGuide: string | null
   isDefault: boolean | null
   isGlobal: boolean | null
+  isPreset: boolean | null
   tenantId: string | null
   createdAt: Date | null
   updatedAt: Date | null
@@ -47,6 +48,7 @@ export type BrandVoiceMaxAggregateOutputType = {
   styleGuide: string | null
   isDefault: boolean | null
   isGlobal: boolean | null
+  isPreset: boolean | null
   tenantId: string | null
   createdAt: Date | null
   updatedAt: Date | null
@@ -62,6 +64,7 @@ export type BrandVoiceCountAggregateOutputType = {
   examples: number
   isDefault: number
   isGlobal: number
+  isPreset: number
   tenantId: number
   createdAt: number
   updatedAt: number
@@ -78,6 +81,7 @@ export type BrandVoiceMinAggregateInputType = {
   styleGuide?: true
   isDefault?: true
   isGlobal?: true
+  isPreset?: true
   tenantId?: true
   createdAt?: true
   updatedAt?: true
@@ -92,6 +96,7 @@ export type BrandVoiceMaxAggregateInputType = {
   styleGuide?: true
   isDefault?: true
   isGlobal?: true
+  isPreset?: true
   tenantId?: true
   createdAt?: true
   updatedAt?: true
@@ -107,6 +112,7 @@ export type BrandVoiceCountAggregateInputType = {
   examples?: true
   isDefault?: true
   isGlobal?: true
+  isPreset?: true
   tenantId?: true
   createdAt?: true
   updatedAt?: true
@@ -195,6 +201,7 @@ export type BrandVoiceGroupByOutputType = {
   examples: string[]
   isDefault: boolean
   isGlobal: boolean
+  isPreset: boolean
   tenantId: string | null
   createdAt: Date
   updatedAt: Date
@@ -231,6 +238,7 @@ export type BrandVoiceWhereInput = {
   examples?: Prisma.StringNullableListFilter<"BrandVoice">
   isDefault?: Prisma.BoolFilter<"BrandVoice"> | boolean
   isGlobal?: Prisma.BoolFilter<"BrandVoice"> | boolean
+  isPreset?: Prisma.BoolFilter<"BrandVoice"> | boolean
   tenantId?: Prisma.StringNullableFilter<"BrandVoice"> | string | null
   createdAt?: Prisma.DateTimeFilter<"BrandVoice"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"BrandVoice"> | Date | string
@@ -247,6 +255,7 @@ export type BrandVoiceOrderByWithRelationInput = {
   examples?: Prisma.SortOrder
   isDefault?: Prisma.SortOrder
   isGlobal?: Prisma.SortOrder
+  isPreset?: Prisma.SortOrder
   tenantId?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -266,6 +275,7 @@ export type BrandVoiceWhereUniqueInput = Prisma.AtLeast<{
   examples?: Prisma.StringNullableListFilter<"BrandVoice">
   isDefault?: Prisma.BoolFilter<"BrandVoice"> | boolean
   isGlobal?: Prisma.BoolFilter<"BrandVoice"> | boolean
+  isPreset?: Prisma.BoolFilter<"BrandVoice"> | boolean
   tenantId?: Prisma.StringNullableFilter<"BrandVoice"> | string | null
   createdAt?: Prisma.DateTimeFilter<"BrandVoice"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"BrandVoice"> | Date | string
@@ -282,6 +292,7 @@ export type BrandVoiceOrderByWithAggregationInput = {
   examples?: Prisma.SortOrder
   isDefault?: Prisma.SortOrder
   isGlobal?: Prisma.SortOrder
+  isPreset?: Prisma.SortOrder
   tenantId?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -303,6 +314,7 @@ export type BrandVoiceScalarWhereWithAggregatesInput = {
   examples?: Prisma.StringNullableListFilter<"BrandVoice">
   isDefault?: Prisma.BoolWithAggregatesFilter<"BrandVoice"> | boolean
   isGlobal?: Prisma.BoolWithAggregatesFilter<"BrandVoice"> | boolean
+  isPreset?: Prisma.BoolWithAggregatesFilter<"BrandVoice"> | boolean
   tenantId?: Prisma.StringNullableWithAggregatesFilter<"BrandVoice"> | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"BrandVoice"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"BrandVoice"> | Date | string
@@ -318,6 +330,7 @@ export type BrandVoiceCreateInput = {
   examples?: Prisma.BrandVoiceCreateexamplesInput | string[]
   isDefault?: boolean
   isGlobal?: boolean
+  isPreset?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   tenant?: Prisma.TenantCreateNestedOneWithoutBrandVoicesInput
@@ -333,6 +346,7 @@ export type BrandVoiceUncheckedCreateInput = {
   examples?: Prisma.BrandVoiceCreateexamplesInput | string[]
   isDefault?: boolean
   isGlobal?: boolean
+  isPreset?: boolean
   tenantId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -348,6 +362,7 @@ export type BrandVoiceUpdateInput = {
   examples?: Prisma.BrandVoiceUpdateexamplesInput | string[]
   isDefault?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isGlobal?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isPreset?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   tenant?: Prisma.TenantUpdateOneWithoutBrandVoicesNestedInput
@@ -363,6 +378,7 @@ export type BrandVoiceUncheckedUpdateInput = {
   examples?: Prisma.BrandVoiceUpdateexamplesInput | string[]
   isDefault?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isGlobal?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isPreset?: Prisma.BoolFieldUpdateOperationsInput | boolean
   tenantId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -378,6 +394,7 @@ export type BrandVoiceCreateManyInput = {
   examples?: Prisma.BrandVoiceCreateexamplesInput | string[]
   isDefault?: boolean
   isGlobal?: boolean
+  isPreset?: boolean
   tenantId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -393,6 +410,7 @@ export type BrandVoiceUpdateManyMutationInput = {
   examples?: Prisma.BrandVoiceUpdateexamplesInput | string[]
   isDefault?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isGlobal?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isPreset?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -407,6 +425,7 @@ export type BrandVoiceUncheckedUpdateManyInput = {
   examples?: Prisma.BrandVoiceUpdateexamplesInput | string[]
   isDefault?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isGlobal?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isPreset?: Prisma.BoolFieldUpdateOperationsInput | boolean
   tenantId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -432,6 +451,7 @@ export type BrandVoiceCountOrderByAggregateInput = {
   examples?: Prisma.SortOrder
   isDefault?: Prisma.SortOrder
   isGlobal?: Prisma.SortOrder
+  isPreset?: Prisma.SortOrder
   tenantId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -446,6 +466,7 @@ export type BrandVoiceMaxOrderByAggregateInput = {
   styleGuide?: Prisma.SortOrder
   isDefault?: Prisma.SortOrder
   isGlobal?: Prisma.SortOrder
+  isPreset?: Prisma.SortOrder
   tenantId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -460,6 +481,7 @@ export type BrandVoiceMinOrderByAggregateInput = {
   styleGuide?: Prisma.SortOrder
   isDefault?: Prisma.SortOrder
   isGlobal?: Prisma.SortOrder
+  isPreset?: Prisma.SortOrder
   tenantId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -526,6 +548,7 @@ export type BrandVoiceCreateWithoutTenantInput = {
   examples?: Prisma.BrandVoiceCreateexamplesInput | string[]
   isDefault?: boolean
   isGlobal?: boolean
+  isPreset?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -540,6 +563,7 @@ export type BrandVoiceUncheckedCreateWithoutTenantInput = {
   examples?: Prisma.BrandVoiceCreateexamplesInput | string[]
   isDefault?: boolean
   isGlobal?: boolean
+  isPreset?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -583,6 +607,7 @@ export type BrandVoiceScalarWhereInput = {
   examples?: Prisma.StringNullableListFilter<"BrandVoice">
   isDefault?: Prisma.BoolFilter<"BrandVoice"> | boolean
   isGlobal?: Prisma.BoolFilter<"BrandVoice"> | boolean
+  isPreset?: Prisma.BoolFilter<"BrandVoice"> | boolean
   tenantId?: Prisma.StringNullableFilter<"BrandVoice"> | string | null
   createdAt?: Prisma.DateTimeFilter<"BrandVoice"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"BrandVoice"> | Date | string
@@ -598,6 +623,7 @@ export type BrandVoiceCreateManyTenantInput = {
   examples?: Prisma.BrandVoiceCreateexamplesInput | string[]
   isDefault?: boolean
   isGlobal?: boolean
+  isPreset?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -612,6 +638,7 @@ export type BrandVoiceUpdateWithoutTenantInput = {
   examples?: Prisma.BrandVoiceUpdateexamplesInput | string[]
   isDefault?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isGlobal?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isPreset?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -626,6 +653,7 @@ export type BrandVoiceUncheckedUpdateWithoutTenantInput = {
   examples?: Prisma.BrandVoiceUpdateexamplesInput | string[]
   isDefault?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isGlobal?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isPreset?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -640,6 +668,7 @@ export type BrandVoiceUncheckedUpdateManyWithoutTenantInput = {
   examples?: Prisma.BrandVoiceUpdateexamplesInput | string[]
   isDefault?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isGlobal?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isPreset?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -656,6 +685,7 @@ export type BrandVoiceSelect<ExtArgs extends runtime.Types.Extensions.InternalAr
   examples?: boolean
   isDefault?: boolean
   isGlobal?: boolean
+  isPreset?: boolean
   tenantId?: boolean
   createdAt?: boolean
   updatedAt?: boolean
@@ -672,6 +702,7 @@ export type BrandVoiceSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Ex
   examples?: boolean
   isDefault?: boolean
   isGlobal?: boolean
+  isPreset?: boolean
   tenantId?: boolean
   createdAt?: boolean
   updatedAt?: boolean
@@ -688,6 +719,7 @@ export type BrandVoiceSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Ex
   examples?: boolean
   isDefault?: boolean
   isGlobal?: boolean
+  isPreset?: boolean
   tenantId?: boolean
   createdAt?: boolean
   updatedAt?: boolean
@@ -704,12 +736,13 @@ export type BrandVoiceSelectScalar = {
   examples?: boolean
   isDefault?: boolean
   isGlobal?: boolean
+  isPreset?: boolean
   tenantId?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type BrandVoiceOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "slug" | "description" | "tone" | "styleGuide" | "examples" | "isDefault" | "isGlobal" | "tenantId" | "createdAt" | "updatedAt", ExtArgs["result"]["brandVoice"]>
+export type BrandVoiceOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "slug" | "description" | "tone" | "styleGuide" | "examples" | "isDefault" | "isGlobal" | "isPreset" | "tenantId" | "createdAt" | "updatedAt", ExtArgs["result"]["brandVoice"]>
 export type BrandVoiceInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   tenant?: boolean | Prisma.BrandVoice$tenantArgs<ExtArgs>
 }
@@ -735,6 +768,7 @@ export type $BrandVoicePayload<ExtArgs extends runtime.Types.Extensions.Internal
     examples: string[]
     isDefault: boolean
     isGlobal: boolean
+    isPreset: boolean
     tenantId: string | null
     createdAt: Date
     updatedAt: Date
@@ -1171,6 +1205,7 @@ export interface BrandVoiceFieldRefs {
   readonly examples: Prisma.FieldRef<"BrandVoice", 'String[]'>
   readonly isDefault: Prisma.FieldRef<"BrandVoice", 'Boolean'>
   readonly isGlobal: Prisma.FieldRef<"BrandVoice", 'Boolean'>
+  readonly isPreset: Prisma.FieldRef<"BrandVoice", 'Boolean'>
   readonly tenantId: Prisma.FieldRef<"BrandVoice", 'String'>
   readonly createdAt: Prisma.FieldRef<"BrandVoice", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"BrandVoice", 'DateTime'>

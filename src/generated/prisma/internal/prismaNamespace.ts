@@ -1691,6 +1691,8 @@ export const PostScalarFieldEnum = {
   mediaUrls: 'mediaUrls',
   mediaType: 'mediaType',
   brandVoice: 'brandVoice',
+  autoReply: 'autoReply',
+  language: 'language',
   status: 'status',
   facebookPostId: 'facebookPostId',
   publishedAt: 'publishedAt',
@@ -1752,6 +1754,9 @@ export const CommentScalarFieldEnum = {
   status: 'status',
   reply: 'reply',
   repliedAt: 'repliedAt',
+  replyType: 'replyType',
+  brandVoiceId: 'brandVoiceId',
+  modelUsed: 'modelUsed',
   createdAt: 'createdAt'
 } as const
 
@@ -1773,6 +1778,7 @@ export const ReplyRuleScalarFieldEnum = {
   endTime: 'endTime',
   replyTemplate: 'replyTemplate',
   action: 'action',
+  brandVoiceId: 'brandVoiceId',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -1852,6 +1858,8 @@ export const AISettingsScalarFieldEnum = {
   defaultModel: 'defaultModel',
   temperature: 'temperature',
   maxTokens: 'maxTokens',
+  defaultLanguage: 'defaultLanguage',
+  defaultBrandVoiceId: 'defaultBrandVoiceId',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -1869,6 +1877,7 @@ export const BrandVoiceScalarFieldEnum = {
   examples: 'examples',
   isDefault: 'isDefault',
   isGlobal: 'isGlobal',
+  isPreset: 'isPreset',
   tenantId: 'tenantId',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
@@ -1991,6 +2000,27 @@ export type ListDateTimeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaM
 
 
 /**
+ * Reference to a field of type 'Boolean'
+ */
+export type BooleanFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Boolean'>
+    
+
+
+/**
+ * Reference to a field of type 'Language'
+ */
+export type EnumLanguageFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Language'>
+    
+
+
+/**
+ * Reference to a field of type 'Language[]'
+ */
+export type ListEnumLanguageFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Language[]'>
+    
+
+
+/**
  * Reference to a field of type 'Int'
  */
 export type IntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Int'>
@@ -2005,9 +2035,16 @@ export type ListIntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel,
 
 
 /**
- * Reference to a field of type 'Boolean'
+ * Reference to a field of type 'CommentStatus'
  */
-export type BooleanFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Boolean'>
+export type EnumCommentStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'CommentStatus'>
+    
+
+
+/**
+ * Reference to a field of type 'CommentStatus[]'
+ */
+export type ListEnumCommentStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'CommentStatus[]'>
     
 
 

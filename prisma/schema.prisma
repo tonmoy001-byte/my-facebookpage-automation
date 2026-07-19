@@ -9,6 +9,21 @@ datasource db {
   provider = "postgresql"
 }
 
+// ─── Enums ─────────────────────────────────────────────────────
+
+enum Language {
+  EN
+  BN
+}
+
+enum CommentStatus {
+  PROCESSING
+  REPLIED
+  PENDING
+  ESCALATED
+  FAILED
+}
+
 // ─── Core Models ───────────────────────────────────────────────
 
 model Tenant {
@@ -89,6 +104,8 @@ model Post {
   mediaUrls       String[] // Cloudflare R2 URLs
   mediaType       String   @default("text") // "text", "image", "video"
   brandVoice      String   @default("professional") // Template name used
+  autoReply       Boolean  @default(false)
+  language        Language @default(EN)
   status          String   @default("draft") // draft, scheduled, publishing, published, failed
   facebookPostId  String?  // ID after publishing
   publishedAt     DateTime?
@@ -170,9 +187,12 @@ model Comment {
   authorName       String
   authorId         String
   content          String
-  status           String    @default("pending") // pending, replied, ignored
+  status           CommentStatus @default(PENDING)
   reply            String?
   repliedAt        DateTime?
+  replyType        String?
+  brandVoiceId     String?
+  modelUsed        String?
   createdAt        DateTime  @default(now())
 
   // Relations
@@ -303,6 +323,8 @@ model AISettings {
   defaultModel    String   @default("google/gemini-2.0-flash:free")
   temperature     Float    @default(0.7)
   maxTokens       Int      @default(1024)
+  defaultLanguage Language @default(EN)
+  defaultBrandVoiceId String?
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 
@@ -324,6 +346,7 @@ model BrandVoice {
   examples    String[]
   isDefault   Boolean  @default(false)
   isGlobal    Boolean  @default(false)
+  isPreset    Boolean  @default(false)
   tenantId    String?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
