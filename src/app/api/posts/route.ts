@@ -2,12 +2,19 @@
 import { NextResponse } from 'next/server';
 import { getCurrentUser } from '@/lib/auth';
 import { prisma, tenantWhere, tenantData } from '@/lib/prisma';
+import { checkRateLimit } from '@/lib/rate-limit';
+import { rateLimitConfig } from '@/lib/rate-limit-config';
 
 export async function GET(request: Request) {
   try {
     const user = await getCurrentUser(request);
     if (!user) {
-      return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
+      return NextResponse.json({ success: false, error: { code: 'UNAUTHORIZED', message: 'Not authenticated' } }, { status: 401 });
+    }
+
+    const rl = checkRateLimit(`posts:${user.tenantId}`, rateLimitConfig.authenticated);
+    if (!rl.allowed) {
+      return NextResponse.json({ success: false, error: { code: 'RATE_LIMITED', message: 'Too many requests.' } }, { status: 429 });
     }
 
     const url = new URL(request.url);
@@ -21,9 +28,7 @@ export async function GET(request: Request) {
     const [posts, total, brandVoices] = await Promise.all([
       prisma.post.findMany({
         where,
-        include: {
-          publishJob: true,
-        },
+        include: { publishJob: true },
         orderBy: { createdAt: 'desc' },
         take: limit,
         skip: offset,
@@ -35,7 +40,6 @@ export async function GET(request: Request) {
       }),
     ]);
 
-    // Map brandVoice cuid → display name
     const voiceMap = new Map(brandVoices.map((v: any) => [v.id, v.name]));
     const postsWithVoiceName = posts.map((p: any) => ({
       ...p,
@@ -45,10 +49,7 @@ export async function GET(request: Request) {
     return NextResponse.json({ posts: postsWithVoiceName, total, limit, offset });
   } catch (error: any) {
     console.error('Get posts error:', error);
-    return NextResponse.json(
-      { error: error.message || 'Failed to get posts' },
-      { status: 500 }
-    );
+    return NextResponse.json({ success: false, error: { code: 'INTERNAL_ERROR', message: error.message || 'Failed to get posts' } }, { status: 500 });
   }
 }
 
@@ -56,38 +57,36 @@ export async function POST(request: Request) {
   try {
     const user = await getCurrentUser(request);
     if (!user) {
-      return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
+      return NextResponse.json({ success: false, error: { code: 'UNAUTHORIZED', message: 'Not authenticated' } }, { status: 401 });
+    }
+
+    const rl = checkRateLimit(`posts:${user.tenantId}`, rateLimitConfig.authenticated);
+    if (!rl.allowed) {
+      return NextResponse.json({ success: false, error: { code: 'RATE_LIMITED', message: 'Too many requests.' } }, { status: 429 });
     }
 
     const { caption, hashtags, imageUrl, mediaUrls, brandVoiceId, scheduledAt, timezone, autoReply, language } = await request.json();
 
     if (!caption) {
-      return NextResponse.json({ error: 'Caption is required' }, { status: 400 });
+      return NextResponse.json({ success: false, error: { code: 'VALIDATION_ERROR', message: 'Caption is required' } }, { status: 400 });
     }
 
-    // Get the user's connected Facebook page (tenant-scoped)
     const page = await prisma.facebookPage.findFirst({
       where: tenantWhere(user.tenantId, { userId: user.id }),
     });
 
     if (!page) {
-      return NextResponse.json(
-        { error: 'No Facebook page connected. Please connect a page first.' },
-        { status: 400 }
-      );
+      return NextResponse.json({ success: false, error: { code: 'NO_PAGE', message: 'No Facebook page connected. Please connect a page first.' } }, { status: 400 });
     }
 
-    // Build content with hashtags
     const hashtagText = hashtags?.length ? '\n\n' + hashtags.map((h: string) => `#${h}`).join(' ') : '';
     const content = caption + hashtagText;
 
-    // Build media URLs
     const finalMediaUrls = mediaUrls || (imageUrl ? [imageUrl] : []);
     const mediaType = finalMediaUrls.length > 0
       ? (finalMediaUrls[0].includes('.mp4') || finalMediaUrls[0].includes('video') ? 'video' : 'image')
       : 'text';
 
-    // Create the post
     const post = await prisma.post.create({
       data: tenantData(user.tenantId, {
         userId: user.id,
@@ -102,10 +101,8 @@ export async function POST(request: Request) {
       }),
     });
 
-    // Create PublishJob + enqueue if scheduled
     if (scheduledAt) {
       const scheduledDate = new Date(scheduledAt);
-
       const publishJob = await prisma.publishJob.create({
         data: {
           postId: post.id,
@@ -127,9 +124,6 @@ export async function POST(request: Request) {
     return NextResponse.json({ post }, { status: 201 });
   } catch (error: any) {
     console.error('Create post error:', error);
-    return NextResponse.json(
-      { error: error.message || 'Failed to create post' },
-      { status: 500 }
-    );
+    return NextResponse.json({ success: false, error: { code: 'INTERNAL_ERROR', message: error.message || 'Failed to create post' } }, { status: 500 });
   }
 }

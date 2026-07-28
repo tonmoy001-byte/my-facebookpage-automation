@@ -3,6 +3,7 @@ import { NextResponse } from 'next/server';
 import { getCurrentUser } from '@/lib/auth';
 import { generateCaption } from '@/lib/ai/caption';
 import { checkRateLimit } from '@/lib/rate-limit';
+import { rateLimitConfig } from '@/lib/rate-limit-config';
 
 export async function POST(request: Request) {
   try {
@@ -14,10 +15,8 @@ export async function POST(request: Request) {
       );
     }
 
-    // Rate limit: 10 requests per minute per tenant
-    const rateLimitKey = `ai-caption:${user.tenantId}`;
-    const allowed = checkRateLimit(rateLimitKey, 10, 60000);
-    if (!allowed) {
+    const rl = checkRateLimit(`ai:caption:${user.tenantId}`, rateLimitConfig.ai);
+    if (!rl.allowed) {
       return NextResponse.json(
         { success: false, error: { code: 'RATE_LIMITED', message: 'Too many requests. Try again in a minute.' } },
         { status: 429 }
@@ -34,7 +33,6 @@ export async function POST(request: Request) {
       );
     }
 
-    // Validate language enum
     if (language && !['EN', 'BN'].includes(language)) {
       return NextResponse.json(
         { success: false, error: { code: 'VALIDATION_ERROR', message: 'Language must be EN or BN' } },

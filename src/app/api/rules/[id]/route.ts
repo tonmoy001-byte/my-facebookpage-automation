@@ -2,6 +2,8 @@
 import { NextResponse } from 'next/server';
 import { getCurrentUser } from '@/lib/auth';
 import { prisma, tenantWhere } from '@/lib/prisma';
+import { checkRateLimit } from '@/lib/rate-limit';
+import { rateLimitConfig } from '@/lib/rate-limit-config';
 
 export async function GET(
   request: Request,
@@ -11,6 +13,11 @@ export async function GET(
     const user = await getCurrentUser(request);
     if (!user) {
       return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
+    }
+
+    const rl = checkRateLimit(`rules:${user.tenantId}`, rateLimitConfig.authenticated);
+    if (!rl.allowed) {
+      return NextResponse.json({ success: false, error: { code: 'RATE_LIMITED', message: 'Too many requests.' } }, { status: 429 });
     }
 
     const { id } = await params;
@@ -26,10 +33,7 @@ export async function GET(
     return NextResponse.json({ rule });
   } catch (error: any) {
     console.error('Get rule error:', error);
-    return NextResponse.json(
-      { error: error.message || 'Failed to get rule' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: error.message || 'Failed to get rule' }, { status: 500 });
   }
 }
 
@@ -43,20 +47,13 @@ export async function PUT(
       return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
     }
 
+    const rl = checkRateLimit(`rules:${user.tenantId}`, rateLimitConfig.authenticated);
+    if (!rl.allowed) {
+      return NextResponse.json({ success: false, error: { code: 'RATE_LIMITED', message: 'Too many requests.' } }, { status: 429 });
+    }
+
     const { id } = await params;
-    const {
-      name,
-      type,
-      keywords,
-      sentiment,
-      daysOfWeek,
-      startTime,
-      endTime,
-      replyTemplate,
-      action,
-      priority,
-      isActive,
-    } = await request.json();
+    const { name, type, keywords, sentiment, daysOfWeek, startTime, endTime, replyTemplate, action, priority, isActive } = await request.json();
 
     const rule = await prisma.replyRule.findFirst({
       where: tenantWhere(user.tenantId, { id, userId: user.id }),
@@ -86,10 +83,7 @@ export async function PUT(
     return NextResponse.json({ rule: updatedRule });
   } catch (error: any) {
     console.error('Update rule error:', error);
-    return NextResponse.json(
-      { error: error.message || 'Failed to update rule' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: error.message || 'Failed to update rule' }, { status: 500 });
   }
 }
 
@@ -103,6 +97,11 @@ export async function DELETE(
       return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
     }
 
+    const rl = checkRateLimit(`rules:${user.tenantId}`, rateLimitConfig.authenticated);
+    if (!rl.allowed) {
+      return NextResponse.json({ success: false, error: { code: 'RATE_LIMITED', message: 'Too many requests.' } }, { status: 429 });
+    }
+
     const { id } = await params;
 
     const rule = await prisma.replyRule.findFirst({
@@ -113,16 +112,11 @@ export async function DELETE(
       return NextResponse.json({ error: 'Rule not found' }, { status: 404 });
     }
 
-    await prisma.replyRule.delete({
-      where: { id },
-    });
+    await prisma.replyRule.delete({ where: { id } });
 
     return NextResponse.json({ message: 'Rule deleted successfully' });
   } catch (error: any) {
     console.error('Delete rule error:', error);
-    return NextResponse.json(
-      { error: error.message || 'Failed to delete rule' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: error.message || 'Failed to delete rule' }, { status: 500 });
   }
 }

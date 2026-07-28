@@ -3,8 +3,9 @@ import { NextResponse } from 'next/server';
 import { getCurrentUser } from '@/lib/auth';
 import { prisma, tenantData } from '@/lib/prisma';
 import { uploadToR2, generateMediaKey, isR2Configured } from '@/lib/storage';
+import { checkRateLimit } from '@/lib/rate-limit';
+import { rateLimitConfig } from '@/lib/rate-limit-config';
 
-// Cloudinary fallback (existing setup)
 async function uploadToCloudinary(buffer: Buffer, folder: string, resourceType: string) {
   const { v2: cloudinary } = await import('cloudinary');
   cloudinary.config({
@@ -32,6 +33,11 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
     }
 
+    const rl = checkRateLimit(`upload:${user.tenantId}`, rateLimitConfig.authenticated);
+    if (!rl.allowed) {
+      return NextResponse.json({ success: false, error: { code: 'RATE_LIMITED', message: 'Too many requests.' } }, { status: 429 });
+    }
+
     const formData = await request.formData();
     const file = formData.get('file') as File;
 
@@ -44,22 +50,16 @@ export async function POST(request: Request) {
       'video/mp4', 'video/quicktime', 'video/webm',
     ];
     if (!allowedTypes.includes(file.type)) {
-      return NextResponse.json(
-        { error: 'Invalid file type. Allowed: JPEG, PNG, GIF, WebP, MP4, QuickTime, WebM' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Invalid file type. Allowed: JPEG, PNG, GIF, WebP, MP4, QuickTime, WebM' }, { status: 400 });
     }
 
-    const MAX_IMAGE_SIZE = 10 * 1024 * 1024; // 10MB
-    const MAX_VIDEO_SIZE = 100 * 1024 * 1024; // 100MB
+    const MAX_IMAGE_SIZE = 10 * 1024 * 1024;
+    const MAX_VIDEO_SIZE = 100 * 1024 * 1024;
     const isVideo = file.type.startsWith('video/');
     const maxSize = isVideo ? MAX_VIDEO_SIZE : MAX_IMAGE_SIZE;
 
     if (file.size > maxSize) {
-      return NextResponse.json(
-        { error: `File too large. Max size: ${isVideo ? '100MB' : '10MB'}` },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: `File too large. Max size: ${isVideo ? '100MB' : '10MB'}` }, { status: 400 });
     }
 
     const bytes = await file.arrayBuffer();
@@ -70,43 +70,27 @@ export async function POST(request: Request) {
     let key: string;
 
     if (isR2Configured()) {
-      // Upload to Cloudflare R2
       key = generateMediaKey(user.id, file.name, isVideo ? 'video' : 'image');
       const r2Result = await uploadToR2(buffer, key, file.type);
       url = r2Result.url;
     } else {
-      // Fallback to Cloudinary
       const result = await uploadToCloudinary(buffer, `fb-saas/${user.id}`, resourceType);
       url = result.secure_url;
       key = result.public_id;
     }
 
-    // Create MediaAsset record
     const mediaAsset = await prisma.mediaAsset.create({
       data: tenantData(user.tenantId, {
-        userId: user.id,
-        fileName: file.name,
-        fileKey: key,
-        fileUrl: url,
-        fileType: file.type,
-        fileSize: file.size,
-        mimeType: file.type,
+        userId: user.id, fileName: file.name, fileKey: key, fileUrl: url,
+        fileType: file.type, fileSize: file.size, mimeType: file.type,
         resourceType: isVideo ? 'video' : 'image',
         storageProvider: isR2Configured() ? 'r2' : 'cloudinary',
       }),
     });
 
-    return NextResponse.json({
-      url,
-      key,
-      type: isVideo ? 'video' : 'image',
-      mediaAssetId: mediaAsset.id,
-    });
+    return NextResponse.json({ url, key, type: isVideo ? 'video' : 'image', mediaAssetId: mediaAsset.id });
   } catch (error: any) {
     console.error('Upload error:', error);
-    return NextResponse.json(
-      { error: error.message || 'Failed to upload file' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: error.message || 'Failed to upload file' }, { status: 500 });
   }
 }

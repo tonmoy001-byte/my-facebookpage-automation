@@ -2,6 +2,8 @@
 import { NextResponse } from 'next/server';
 import { getCurrentUser } from '@/lib/auth';
 import { prisma, tenantWhere } from '@/lib/prisma';
+import { checkRateLimit } from '@/lib/rate-limit';
+import { rateLimitConfig } from '@/lib/rate-limit-config';
 
 export async function GET(request: Request) {
   try {
@@ -10,24 +12,20 @@ export async function GET(request: Request) {
       return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
     }
 
-    // Return global brand voices + tenant-specific brand voices
+    const rl = checkRateLimit(`brand-voices:${user.tenantId}`, rateLimitConfig.authenticated);
+    if (!rl.allowed) {
+      return NextResponse.json({ success: false, error: { code: 'RATE_LIMITED', message: 'Too many requests.' } }, { status: 429 });
+    }
+
     const voices = await prisma.brandVoice.findMany({
-      where: {
-        OR: [
-          { isGlobal: true },
-          { tenantId: user.tenantId },
-        ],
-      },
+      where: { OR: [{ isGlobal: true }, { tenantId: user.tenantId }] },
       orderBy: { name: 'asc' },
     });
 
     return NextResponse.json({ voices });
   } catch (error: any) {
     console.error('Get brand voices error:', error);
-    return NextResponse.json(
-      { error: error.message || 'Failed to get brand voices' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: error.message || 'Failed to get brand voices' }, { status: 500 });
   }
 }
 
@@ -38,37 +36,30 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
     }
 
+    const rl = checkRateLimit(`brand-voices:${user.tenantId}`, rateLimitConfig.authenticated);
+    if (!rl.allowed) {
+      return NextResponse.json({ success: false, error: { code: 'RATE_LIMITED', message: 'Too many requests.' } }, { status: 429 });
+    }
+
     const { name, description, tone, styleGuide, examples } = await request.json();
 
     if (!name || !description) {
-      return NextResponse.json(
-        { error: 'Name and description are required' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Name and description are required' }, { status: 400 });
     }
 
     const slug = name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
 
     const voice = await prisma.brandVoice.create({
       data: {
-        name,
-        slug,
-        description,
-        tone: tone || 'professional',
-        styleGuide: styleGuide || '',
-        examples: examples || [],
-        isDefault: false,
-        isGlobal: false,
-        tenantId: user.tenantId,
+        name, slug, description, tone: tone || 'professional',
+        styleGuide: styleGuide || '', examples: examples || [],
+        isDefault: false, isGlobal: false, tenantId: user.tenantId,
       },
     });
 
     return NextResponse.json({ voice }, { status: 201 });
   } catch (error: any) {
     console.error('Create brand voice error:', error);
-    return NextResponse.json(
-      { error: error.message || 'Failed to create brand voice' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: error.message || 'Failed to create brand voice' }, { status: 500 });
   }
 }

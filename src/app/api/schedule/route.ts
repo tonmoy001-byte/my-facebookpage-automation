@@ -3,6 +3,8 @@ import { NextResponse } from 'next/server';
 import { getCurrentUser } from '@/lib/auth';
 import { prisma, tenantWhere } from '@/lib/prisma';
 import { schedulePublishJob } from '@/lib/queue';
+import { checkRateLimit } from '@/lib/rate-limit';
+import { rateLimitConfig } from '@/lib/rate-limit-config';
 
 export async function GET(request: Request) {
   try {
@@ -11,12 +13,16 @@ export async function GET(request: Request) {
       return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
     }
 
+    const rl = checkRateLimit(`schedule:${user.tenantId}`, rateLimitConfig.authenticated);
+    if (!rl.allowed) {
+      return NextResponse.json({ success: false, error: { code: 'RATE_LIMITED', message: 'Too many requests.' } }, { status: 429 });
+    }
+
     const url = new URL(request.url);
     const startDate = url.searchParams.get('start');
     const endDate = url.searchParams.get('end');
 
     const where: any = tenantWhere(user.tenantId, { userId: user.id });
-
     if (startDate || endDate) {
       where.scheduledAt = {};
       if (startDate) where.scheduledAt.gte = new Date(startDate);
@@ -26,17 +32,7 @@ export async function GET(request: Request) {
     const jobs = await prisma.publishJob.findMany({
       where,
       include: {
-        post: {
-          select: {
-            id: true,
-            content: true,
-            mediaUrls: true,
-            mediaType: true,
-            status: true,
-            brandVoice: true,
-            facebookPostId: true,
-          },
-        },
+        post: { select: { id: true, content: true, mediaUrls: true, mediaType: true, status: true, brandVoice: true, facebookPostId: true } },
       },
       orderBy: { scheduledAt: 'asc' },
     });
@@ -44,10 +40,7 @@ export async function GET(request: Request) {
     return NextResponse.json({ schedules: jobs });
   } catch (error: any) {
     console.error('Get schedule error:', error);
-    return NextResponse.json(
-      { error: error.message || 'Failed to get schedule' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: error.message || 'Failed to get schedule' }, { status: 500 });
   }
 }
 
@@ -58,24 +51,22 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
     }
 
+    const rl = checkRateLimit(`schedule:${user.tenantId}`, rateLimitConfig.authenticated);
+    if (!rl.allowed) {
+      return NextResponse.json({ success: false, error: { code: 'RATE_LIMITED', message: 'Too many requests.' } }, { status: 429 });
+    }
+
     const { postId, scheduledAt, timezone } = await request.json();
 
     if (!postId || !scheduledAt) {
-      return NextResponse.json(
-        { error: 'Post ID and scheduled time are required' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Post ID and scheduled time are required' }, { status: 400 });
     }
 
     const scheduledDate = new Date(scheduledAt);
     if (scheduledDate <= new Date()) {
-      return NextResponse.json(
-        { error: 'Scheduled time must be in the future' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Scheduled time must be in the future' }, { status: 400 });
     }
 
-    // Verify the post belongs to the user (tenant-scoped)
     const post = await prisma.post.findFirst({
       where: tenantWhere(user.tenantId, { id: postId, userId: user.id }),
     });
@@ -84,39 +75,21 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Post not found' }, { status: 404 });
     }
 
-    // Upsert PublishJob
     let publishJob = await prisma.publishJob.findFirst({ where: { postId } });
 
     if (publishJob) {
       publishJob = await prisma.publishJob.update({
         where: { id: publishJob.id },
-        data: {
-          scheduledAt: scheduledDate,
-          timezone: timezone || 'UTC',
-          status: 'queued',
-          attempts: 0,
-          errorMessage: null,
-        },
+        data: { scheduledAt: scheduledDate, timezone: timezone || 'UTC', status: 'queued', attempts: 0, errorMessage: null },
       });
     } else {
       publishJob = await prisma.publishJob.create({
-        data: {
-          postId,
-          userId: user.id,
-          tenantId: user.tenantId,
-          scheduledAt: scheduledDate,
-          timezone: timezone || 'UTC',
-        },
+        data: { postId, userId: user.id, tenantId: user.tenantId, scheduledAt: scheduledDate, timezone: timezone || 'UTC' },
       });
     }
 
-    // Update post status
-    await prisma.post.update({
-      where: { id: postId },
-      data: { status: 'scheduled' },
-    });
+    await prisma.post.update({ where: { id: postId }, data: { status: 'scheduled' } });
 
-    // Enqueue to Redis BullMQ
     try {
       await schedulePublishJob(publishJob.id, scheduledDate);
     } catch (queueError) {
@@ -126,9 +99,6 @@ export async function POST(request: Request) {
     return NextResponse.json({ schedule: publishJob }, { status: 201 });
   } catch (error: any) {
     console.error('Create schedule error:', error);
-    return NextResponse.json(
-      { error: error.message || 'Failed to create schedule' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: error.message || 'Failed to create schedule' }, { status: 500 });
   }
 }

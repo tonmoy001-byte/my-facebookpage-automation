@@ -2,6 +2,8 @@
 import { NextResponse } from 'next/server';
 import { getCurrentUser } from '@/lib/auth';
 import { prisma, tenantWhere } from '@/lib/prisma';
+import { checkRateLimit } from '@/lib/rate-limit';
+import { rateLimitConfig } from '@/lib/rate-limit-config';
 
 export async function GET(
   request: Request,
@@ -13,16 +15,15 @@ export async function GET(
       return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
     }
 
+    const rl = checkRateLimit(`brand-voices:${user.tenantId}`, rateLimitConfig.authenticated);
+    if (!rl.allowed) {
+      return NextResponse.json({ success: false, error: { code: 'RATE_LIMITED', message: 'Too many requests.' } }, { status: 429 });
+    }
+
     const { id } = await params;
 
     const voice = await prisma.brandVoice.findFirst({
-      where: {
-        id,
-        OR: [
-          { isGlobal: true },
-          { tenantId: user.tenantId },
-        ],
-      },
+      where: { id, OR: [{ isGlobal: true }, { tenantId: user.tenantId }] },
     });
 
     if (!voice) {
@@ -32,10 +33,7 @@ export async function GET(
     return NextResponse.json({ voice });
   } catch (error: any) {
     console.error('Get brand voice error:', error);
-    return NextResponse.json(
-      { error: error.message || 'Failed to get brand voice' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: error.message || 'Failed to get brand voice' }, { status: 500 });
   }
 }
 
@@ -49,16 +47,16 @@ export async function PUT(
       return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
     }
 
+    const rl = checkRateLimit(`brand-voices:${user.tenantId}`, rateLimitConfig.authenticated);
+    if (!rl.allowed) {
+      return NextResponse.json({ success: false, error: { code: 'RATE_LIMITED', message: 'Too many requests.' } }, { status: 429 });
+    }
+
     const { id } = await params;
     const { name, description, tone, styleGuide, examples } = await request.json();
 
-    // Only allow editing tenant-specific or owned voices, not global ones
     const voice = await prisma.brandVoice.findFirst({
-      where: {
-        id,
-        tenantId: user.tenantId,
-        isGlobal: false,
-      },
+      where: { id, tenantId: user.tenantId, isGlobal: false },
     });
 
     if (!voice) {
@@ -68,10 +66,8 @@ export async function PUT(
     const updatedVoice = await prisma.brandVoice.update({
       where: { id },
       data: {
-        name: name || voice.name,
-        description: description || voice.description,
-        tone: tone || voice.tone,
-        styleGuide: styleGuide || voice.styleGuide,
+        name: name || voice.name, description: description || voice.description,
+        tone: tone || voice.tone, styleGuide: styleGuide || voice.styleGuide,
         examples: examples || voice.examples,
       },
     });
@@ -79,10 +75,7 @@ export async function PUT(
     return NextResponse.json({ voice: updatedVoice });
   } catch (error: any) {
     console.error('Update brand voice error:', error);
-    return NextResponse.json(
-      { error: error.message || 'Failed to update brand voice' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: error.message || 'Failed to update brand voice' }, { status: 500 });
   }
 }
 
@@ -96,14 +89,15 @@ export async function DELETE(
       return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
     }
 
+    const rl = checkRateLimit(`brand-voices:${user.tenantId}`, rateLimitConfig.authenticated);
+    if (!rl.allowed) {
+      return NextResponse.json({ success: false, error: { code: 'RATE_LIMITED', message: 'Too many requests.' } }, { status: 429 });
+    }
+
     const { id } = await params;
 
     const voice = await prisma.brandVoice.findFirst({
-      where: {
-        id,
-        tenantId: user.tenantId,
-        isGlobal: false,
-      },
+      where: { id, tenantId: user.tenantId, isGlobal: false },
     });
 
     if (!voice) {
@@ -115,9 +109,6 @@ export async function DELETE(
     return NextResponse.json({ message: 'Brand voice deleted successfully' });
   } catch (error: any) {
     console.error('Delete brand voice error:', error);
-    return NextResponse.json(
-      { error: error.message || 'Failed to delete brand voice' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: error.message || 'Failed to delete brand voice' }, { status: 500 });
   }
 }

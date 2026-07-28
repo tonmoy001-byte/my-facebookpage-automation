@@ -4,6 +4,8 @@ import { getCurrentUser } from '@/lib/auth';
 import { encrypt } from '@/lib/encryption';
 import { prisma, tenantWhere } from '@/lib/prisma';
 import axios from 'axios';
+import { checkRateLimit, markAuthFailed, resetBackoff } from '@/lib/rate-limit';
+import { rateLimitConfig } from '@/lib/rate-limit-config';
 
 export async function POST(request: Request) {
   try {
@@ -12,51 +14,39 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
     }
 
+    const rl = checkRateLimit(`fb-connect:${user.tenantId}`, rateLimitConfig.authenticated);
+    if (!rl.allowed) {
+      return NextResponse.json({ success: false, error: { code: 'RATE_LIMITED', message: 'Too many requests.' } }, { status: 429 });
+    }
+
     const { pageId, pageName, accessToken } = await request.json();
 
     if (!pageId || !pageName || !accessToken) {
-      return NextResponse.json(
-        { error: 'Page ID, name, and access token are required' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Page ID, name, and access token are required' }, { status: 400 });
     }
 
-    // Verify the access token is valid by making a test API call
     try {
       const verifyUrl = `https://graph.facebook.com/v19.0/me?access_token=${accessToken}`;
       await axios.get(verifyUrl);
     } catch (error) {
-      return NextResponse.json(
-        { error: 'Invalid Facebook access token' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Invalid Facebook access token' }, { status: 400 });
     }
 
-    // Check if user already has a page connected (tenant-scoped)
     const existingPage = await prisma.facebookPage.findFirst({
       where: tenantWhere(user.tenantId, { userId: user.id }),
     });
 
     if (existingPage) {
-      // Update existing page
       const updatedPage = await prisma.facebookPage.update({
         where: { id: existingPage.id },
-        data: {
-          pageId,
-          pageName,
-          accessToken: encrypt(accessToken),
-        },
+        data: { pageId, pageName, accessToken: encrypt(accessToken) },
       });
       return NextResponse.json({ page: updatedPage });
     }
 
-    // Create new page connection with tenant
     const page = await prisma.facebookPage.create({
       data: {
-        userId: user.id,
-        tenantId: user.tenantId,
-        pageId,
-        pageName,
+        userId: user.id, tenantId: user.tenantId, pageId, pageName,
         accessToken: encrypt(accessToken),
         webhookToken: `wh_${Math.random().toString(36).substring(2, 15)}`,
       },
@@ -65,9 +55,6 @@ export async function POST(request: Request) {
     return NextResponse.json({ page }, { status: 201 });
   } catch (error: any) {
     console.error('Facebook connect error:', error);
-    return NextResponse.json(
-      { error: error.message || 'Failed to connect Facebook page' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: error.message || 'Failed to connect Facebook page' }, { status: 500 });
   }
 }

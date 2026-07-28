@@ -3,6 +3,7 @@ import { NextResponse } from 'next/server';
 import { getCurrentUser } from '@/lib/auth';
 import { callGemini, imageToBase64DataUri, getLanguageInstruction, type OpenRouterMessage } from '@/lib/ai/client';
 import { checkRateLimit } from '@/lib/rate-limit';
+import { rateLimitConfig } from '@/lib/rate-limit-config';
 
 export async function POST(request: Request) {
   try {
@@ -14,10 +15,8 @@ export async function POST(request: Request) {
       );
     }
 
-    // Rate limit: 10 requests per minute per tenant
-    const rateLimitKey = `ai-image:${user.tenantId}`;
-    const allowed = checkRateLimit(rateLimitKey, 10, 60000);
-    if (!allowed) {
+    const rl = checkRateLimit(`ai:image:${user.tenantId}`, rateLimitConfig.ai);
+    if (!rl.allowed) {
       return NextResponse.json(
         { success: false, error: { code: 'RATE_LIMITED', message: 'Too many requests. Try again in a minute.' } },
         { status: 429 }
@@ -78,7 +77,6 @@ Return your analysis as JSON:
         },
       });
     } catch {
-      // If JSON parsing fails, return the raw text as description
       return NextResponse.json({
         success: true,
         data: {
