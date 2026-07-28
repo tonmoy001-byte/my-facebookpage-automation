@@ -63,6 +63,12 @@ export default function Navigation() {
                   Comments
                 </Link>
                 <Link
+                  href="/assistant"
+                  className="text-gray-700 hover:text-blue-600"
+                >
+                  Assistant
+                </Link>
+                <Link
                   href="/analytics"
                   className="text-gray-700 hover:text-blue-600"
                 >
