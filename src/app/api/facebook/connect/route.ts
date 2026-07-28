@@ -32,23 +32,23 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Invalid Facebook access token' }, { status: 400 });
     }
 
-    const existingPage = await prisma.facebookPage.findFirst({
-      where: tenantWhere(user.tenantId, { userId: user.id }),
-    });
+    const encryptedToken = encrypt(accessToken);
 
-    if (existingPage) {
-      const updatedPage = await prisma.facebookPage.update({
-        where: { id: existingPage.id },
-        data: { pageId, pageName, accessToken: encrypt(accessToken) },
-      });
-      return NextResponse.json({ page: updatedPage });
-    }
-
-    const page = await prisma.facebookPage.create({
-      data: {
-        userId: user.id, tenantId: user.tenantId, pageId, pageName,
-        accessToken: encrypt(accessToken),
+    const page = await prisma.facebookPage.upsert({
+      where: { pageId },
+      create: {
+        userId: user.id,
+        tenantId: user.tenantId,
+        pageId,
+        pageName,
+        accessToken: encryptedToken,
         webhookToken: `wh_${Math.random().toString(36).substring(2, 15)}`,
+      },
+      update: {
+        pageName,
+        accessToken: encryptedToken,
+        userId: user.id,
+        tenantId: user.tenantId,
       },
     });
 
