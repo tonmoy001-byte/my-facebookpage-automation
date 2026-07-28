@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/auth-context';
+import Link from 'next/link';
 import Navigation from '@/components/Navigation';
 import DirectPublish from '@/components/DirectPublish';
 
@@ -114,7 +115,7 @@ export default function DashboardPage() {
               <div>
                 <p className="text-yellow-800 font-medium">No Facebook page connected</p>
                 <p className="text-yellow-700 text-sm">
-                  <a href="/settings" className="underline hover:text-yellow-900">Go to Settings → Facebook</a> to connect your page before publishing.
+                  <Link href="/settings" className="underline hover:text-yellow-900">Go to Settings → Facebook</Link> to connect your page before publishing.
                 </p>
               </div>
             </div>

@@ -45,7 +45,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       });
       if (response.ok) {
         const data = await response.json();
-        setUser(data.user);
+        setUser(data.data?.user ?? data.user);
       } else {
         localStorage.removeItem('token');
         setToken(null);
