@@ -13,7 +13,8 @@ export async function GET(request: Request) {
       );
     }
 
-    const scopes = 'email,public_profile,pages_show_list,pages_manage_posts,pages_read_engagement,pages_read_user_content';
+    // Only basic permissions during login — page permissions requested later when connecting a page
+    const scopes = 'email,public_profile,pages_show_list';
 
     const facebookAuthUrl = new URL('https://www.facebook.com/v19.0/dialog/oauth');
     facebookAuthUrl.searchParams.set('client_id', FACEBOOK_APP_ID);
