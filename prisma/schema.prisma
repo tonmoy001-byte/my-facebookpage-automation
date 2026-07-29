@@ -55,8 +55,9 @@ model Tenant {
 model User {
   id            String    @id @default(cuid())
   email         String    @unique
-  passwordHash  String
+  passwordHash  String?
   name          String
+  facebookId    String?   @unique
   tenantId      String    @default("")  // Will be backfilled
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
@@ -69,6 +70,7 @@ model User {
   comments      Comment[]
 
   @@index([tenantId])
+  @@index([facebookId])
 }
 
 // ─── Facebook Integration ─────────────────────────────────────

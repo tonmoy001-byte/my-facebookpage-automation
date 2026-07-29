@@ -29,8 +29,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const router = useRouter();
 
   useEffect(() => {
-    const storedToken = localStorage.getItem('token');
+    // Check for token from Facebook OAuth cookie first
+    const cookieToken = document.cookie
+      .split('; ')
+      .find((row) => row.startsWith('fb_autopost_token='))
+      ?.split('=')[1];
+
+    const storedToken = cookieToken || localStorage.getItem('token');
+
     if (storedToken) {
+      // If token came from cookie, also save to localStorage for persistence
+      if (cookieToken && !localStorage.getItem('token')) {
+        localStorage.setItem('token', cookieToken);
+      }
       setToken(storedToken);
       fetchUser(storedToken);
     } else {
