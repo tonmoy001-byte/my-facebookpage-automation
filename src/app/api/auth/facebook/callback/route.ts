@@ -122,17 +122,8 @@ export async function GET(request: Request) {
       tenantId: user!.tenantId,
     });
 
-    // Redirect to dashboard with token in cookie
-    const response = NextResponse.redirect(`${baseUrl}/dashboard`);
-    response.cookies.set('fb_autopost_token', token, {
-      httpOnly: true,
-      secure: true,
-      sameSite: 'lax',
-      maxAge: 7 * 24 * 60 * 60, // 7 days
-      path: '/',
-    });
-
-    return response;
+    // Redirect to client-side callback page — it stores token in localStorage then redirects to dashboard
+    return NextResponse.redirect(`${baseUrl}/auth/callback?token=${encodeURIComponent(token)}`);
   } catch (error: any) {
     console.error('Facebook OAuth callback error:', error);
     const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://fb-saas.vercel.app';
